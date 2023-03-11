@@ -1,7 +1,7 @@
-OBJS	= udp.o teste.o
-SOURCE	= udp.c teste.c
-HEADER	= udp.h
-OUT	= teste
+OBJS	= udp.o cot.o
+SOURCE	= udp.c cot.c
+HEADER	= udp.h cot.h
+OUT	= cot
 CC	 = gcc
 FLAGS	 = -g -c -Wall
 LFLAGS	 = 
@@ -12,8 +12,8 @@ all: $(OBJS)
 udp.o: udp.c
 	$(CC) $(FLAGS) udp.c 
 
-teste.o: teste.c
-	$(CC) $(FLAGS) teste.c 
+cot.o: cot.c
+	$(CC) $(FLAGS) cot.c 
 
 
 clean:
