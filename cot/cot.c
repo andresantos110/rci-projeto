@@ -32,28 +32,29 @@ int main(int argc, char **argv)
     fgets(input, sizeof(input), stdin);
 
     command = strtok(input, " ");
-    printf("%s ", command);
     arg1 = strtok(NULL, " ");
-    printf("%s ", arg1);
     arg2 = strtok(NULL, " ");
-    printf("%s", arg2);
     arg3 = strtok(NULL, " ");
     arg4 = strtok(NULL, " ");
     arg5 = strtok(NULL, "");
 
     if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
     {
+        if(strlen(arg1) != 3) exit(1);
+
         strcat(message, arg1);
 
         errcode = commUDP(message, buffer, regIP, regUDP);
         if(errcode != 0) return -1;
 
-        printf("Enviada: %s \nRecebida: %s\n", message, buffer);
+        printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer);
 
         if(compare_udp_messages(buffer, arg2) == 1) nodo->id = atoi(arg2+1); 
         else nodo->id = atoi(arg2);
 
-        errcode = commUDP(snprintf(message, sizeof(message), "%s %s %s %s", arg1, arg2, IP, TCP), buffer, regIP, regUDP);
+        printf("%d \n", nodo->id);
+
+        //errcode = commUDP(snprintf(message, sizeof(message), "%s %s %s %s", arg1, arg2, IP, TCP), buffer, regIP, regUDP);
         if(errcode != 0) return -1;
 
         //enviar REG por tcp
