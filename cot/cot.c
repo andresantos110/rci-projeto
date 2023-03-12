@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 
         printf("%d \n", nodo->id);
 
-        //errcode = commUDP(snprintf(message, sizeof(message), "%s %s %s %s", arg1, arg2, IP, TCP), buffer, regIP, regUDP);
+        errcode = commUDP(snprintf(message, sizeof(message), "%s %s %s %s", arg1, arg2, IP, TCP), buffer, regIP, regUDP);
         if(errcode != 0) return -1;
 
         //enviar REG por tcp
