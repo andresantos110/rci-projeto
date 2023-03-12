@@ -4,6 +4,7 @@
         "udp.h": "c",
         "stdio.h": "c",
         "types.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "inet.h": "c"
     }
 }

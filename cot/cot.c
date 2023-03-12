@@ -4,11 +4,13 @@
 int main(int argc, char **argv)
 {
     char regIP[16], regUDP[6], IP[16], TCP[6];
-    char message[128+1] = "UDP Arrumado";
     char buffer[128+1];
+    char message[128+1] = "NODES ";
     char input[128];
     char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
     int errcode;
+    struct node *nodo = (struct node*) malloc (sizeof(struct node));
+
 
 
     if(argc != 5 && argc != 3) exit(1); //inicializacao dos valores dados como argumento
@@ -30,20 +32,34 @@ int main(int argc, char **argv)
     fgets(input, sizeof(input), stdin);
 
     command = strtok(input, " ");
+    printf("%s ", command);
     arg1 = strtok(NULL, " ");
+    printf("%s ", arg1);
     arg2 = strtok(NULL, " ");
+    printf("%s", arg2);
     arg3 = strtok(NULL, " ");
     arg4 = strtok(NULL, " ");
     arg5 = strtok(NULL, "");
 
     if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
     {
-        //pedir ao servidor lista de nós
-        //verificar se id ja esta a ser usado
-        //se sim, atribuir outro
-        //estrutura para os nós
+        strcat(message, arg1);
+
+        errcode = commUDP(message, buffer, regIP, regUDP);
+        if(errcode != 0) return -1;
+
+        printf("Enviada: %s \nRecebida: %s\n", message, buffer);
+
+        if(compare_udp_messages(buffer, arg2) == 1) nodo->id = atoi(arg2+1); 
+        else nodo->id = atoi(arg2);
+
+        errcode = commUDP(snprintf(message, sizeof(message), "%s %s %s %s", arg1, arg2, IP, TCP), buffer, regIP, regUDP);
+        if(errcode != 0) return -1;
+
+        //enviar REG por tcp
         //abrir SERVIDOR tcp para primeiro nó - verificar tamanho da resposta do servidor
         //estabelecer ligacao para nos seguintes
+        //definir ext, bck e intr.
         //falta select??? para ver se vai ler do teclado ou receber ligacao
     }
 
@@ -55,11 +71,13 @@ int main(int argc, char **argv)
 
     }
 
+    free(nodo);
 
-    errcode = commUDP(message, buffer, regIP, regUDP);
 
-        if(errcode != 0) return -1;
-        else printf("Enviada: %s \nRecebida: %s\n", message, buffer);
+    //errcode = commUDP(message, buffer, regIP, regUDP);
+
+        //if(errcode != 0) return -1;
+        //else printf("Enviada: %s \nRecebida: %s\n", message, buffer);
 
     return 0;
 }
