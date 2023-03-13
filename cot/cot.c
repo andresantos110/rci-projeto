@@ -37,6 +37,7 @@ int main(int argc, char **argv)
     arg3 = strtok(NULL, " ");
     arg4 = strtok(NULL, " ");
     arg5 = strtok(NULL, "");
+   
 
     if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
     {
@@ -49,13 +50,19 @@ int main(int argc, char **argv)
 
         printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer);
 
+        if(strstr(buffer, arg2) != NULL) nodo->id = atoi(arg2+1);
+        else nodo->id = atoi(arg2);
+
         //if(compare_udp_messages(buffer, arg2) == 1) nodo->id = atoi(arg2+1); 
         //else nodo->id = atoi(arg2);
 
-        //printf("%d \n", nodo->id);
+        errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, arg2, IP, TCP);
+        if(errcode >= sizeof(message)) return -1;
 
-        //errcode = commUDP(snprintf(message, sizeof(message), "%s %s %s %s", arg1, arg2, IP, TCP), buffer, regIP, regUDP);
-        //if(errcode != 0) return -1;
+        printf("%s", message);
+
+        errcode = commUDP(message, buffer, regIP, regUDP);
+        if(errcode != 0) return -1;
 
         //enviar REG por tcp
         //abrir SERVIDOR tcp para primeiro nó - verificar tamanho da resposta do servidor

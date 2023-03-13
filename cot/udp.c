@@ -39,7 +39,7 @@ int commUDP(char mensagem[], char buffer[], char regIP[], char regUDP[])
 
 
 
-int compare_udp_messages(char *message, char *known_chars) 
+int compare_udp_messages(char message[], char known_chars[]) 
 {
     char *line;
     char *next_line;
