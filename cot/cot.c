@@ -50,18 +50,15 @@ int main(int argc, char **argv)
 
         printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer);
 
-        if(strstr(buffer, arg2) != NULL) nodo->id = atoi(arg2+1);
+        if(strstr(buffer, arg2) != NULL) nodo->id = atoi(arg2+1); //verificar se nó já existe
         else nodo->id = atoi(arg2);
 
-        //if(compare_udp_messages(buffer, arg2) == 1) nodo->id = atoi(arg2+1); 
-        //else nodo->id = atoi(arg2);
-
-        errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, arg2, IP, TCP);
+        errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, arg2, IP, TCP); //juntar strings para enviar
         if(errcode >= sizeof(message)) return -1;
 
-        printf("%s", message);
+        printf("ENVIAR:\n%s", message);
 
-        errcode = commUDP(message, buffer, regIP, regUDP);
+        errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
         if(errcode != 0) return -1;
 
         //enviar REG por tcp
