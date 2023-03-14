@@ -5,3 +5,10 @@
 #include <netdb.h>
 #include <string.h>
 #include <unistd.h>
+
+struct node{
+    char id;
+    char ext;
+    char bck;
+    int intr[128+1];
+};

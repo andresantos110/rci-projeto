@@ -61,7 +61,6 @@ int main(int argc, char **argv)
         errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
         if(errcode != 0) return -1;
 
-        //enviar REG por tcp
         //abrir SERVIDOR tcp para primeiro nó - verificar tamanho da resposta do servidor
         //estabelecer ligacao para nos seguintes
         //definir ext, bck e intr.
