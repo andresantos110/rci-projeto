@@ -1,5 +1,6 @@
 #include "cot.h"
 #include "udp.h"
+#include "select.h"
 
 int main(int argc, char **argv)
 {
@@ -60,6 +61,8 @@ int main(int argc, char **argv)
 
         errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
         if(errcode != 0) return -1;
+
+        tcpSelect(nodo, IP, TCP);
 
         //abrir SERVIDOR tcp para primeiro nó - verificar tamanho da resposta do servidor
         //estabelecer ligacao para nos seguintes

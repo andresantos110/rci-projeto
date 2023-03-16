@@ -1,5 +1,17 @@
 #include "cot.h"
+#include "udp.h"
 #include "select.h"
+
+int main()
+{
+    struct node *nodo = (struct node*) malloc (sizeof(struct node));
+    char *IP = "127.127.127.127";
+    char *TCP = "58001";
+    tcpSelect(nodo, IP, TCP);
+    return 0;
+
+
+}
 
 void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 {
@@ -59,6 +71,9 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
             int client_fd;
             client_fd = accept(server_fd, (struct sockaddr*)&client_addr, & client_addrlen);
             if(client_fd == -1) exit(1);
+
+            printf("New connection , socket fd is %d , ip is : %s , port : %d\n" , client_fd, inet_ntoa(client_addr.sin_addr) , ntohs
+                  (client_addr.sin_port));  
 
             for (int i = 0; i < 100; i++)
             {

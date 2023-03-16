@@ -1,6 +1,6 @@
-OBJS	= udp.o cot.o
-SOURCE	= udp.c cot.c
-HEADER	= udp.h cot.h
+OBJS	= udp.o cot.o select.o
+SOURCE	= udp.c cot.c select.c
+HEADER	= udp.h cot.h select.h
 OUT	= cot
 CC	 = gcc
 FLAGS	 = -g -c -Wall
@@ -14,6 +14,9 @@ udp.o: udp.c
 
 cot.o: cot.c
 	$(CC) $(FLAGS) cot.c 
+	
+select.o: select.c
+	$(CC) $(FLAGS) select.c 
 
 
 clean:
