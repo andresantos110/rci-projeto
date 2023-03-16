@@ -29,16 +29,45 @@ int main(int argc, char **argv)
     strcpy(IP, argv[1]);
     strcpy(TCP, argv[2]);
 
+
     printf("Enter a command: \n");
     fgets(input, sizeof(input), stdin);
 
-    command = strtok(input, " ");
-    arg1 = strtok(NULL, " ");
-    arg2 = strtok(NULL, " ");
-    arg3 = strtok(NULL, " ");
-    arg4 = strtok(NULL, " ");
-    arg5 = strtok(NULL, "");
-   
+    input[strcspn(input, "\n")] = 0; 
+
+    char *word_array[6]; 
+    int word_count = 0;
+
+    char *token = strtok(input, " ");
+    while (token != NULL && word_count < 20) {
+        word_array[word_count++] = token;
+        token = strtok(NULL, " ");
+    }
+
+    // Print out the words in the array
+    printf("Words in the array:\n");
+    for (int i = 0; i < word_count; i++) {
+        printf("%s\n", word_array[i]);
+    }
+
+    if (word_count == 1){
+        command = word_array[0];
+    }
+
+    if (word_count == 3){
+        command = word_array[0];
+        arg1 = word_array[1];
+        arg2 = word_array[2];
+    }
+
+    if (word_count == 6){
+        command = word_array[0];
+        arg1 = word_array[1];
+        arg2 = word_array[2];
+        arg3 = word_array[3];
+        arg4 = word_array[4];
+        arg5 = word_array[5];
+    }
 
     if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
     {
