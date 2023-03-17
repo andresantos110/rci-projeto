@@ -48,22 +48,19 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 
     while(1)
     {
-        if(select(max_fd +1, &read_fds, NULL, NULL, NULL) == -1) exit(1);
-
-                //add child sockets to set 
         for ( i = 0 ; i < 100 ; i++)  
         {  
-            //socket descriptor 
             fds = client_fds[i];  
                  
-            //if valid socket descriptor then add to read list 
             if(fds > 0)  
                 FD_SET(fds, &read_fds);  
                  
-            //highest file descriptor number, need it for the select function 
             if(fds > max_fd)  
                 max_fd = fds;  
         }
+
+
+        if(select(max_fd +1, &read_fds, NULL, NULL, NULL) == -1) exit(1);
         
 
         if(FD_ISSET(server_fd, &read_fds))
@@ -86,7 +83,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
             }
         }
 
-        //else its some IO operation on some other socket
+        //else some other socket
         for (i = 0; i < 100; i++)  
         {  
             fds = client_fds[i];  
@@ -115,7 +112,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
                     //of the data read 
                     buffer[valread] = '\0';  
                     send(fds, buffer , strlen(buffer) , 0 );  
-                }  
+                } 
             } 
         } 
 
