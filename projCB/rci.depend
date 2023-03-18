@@ -1,0 +1,24 @@
+# depslib dependency file v1.0
+1679155386 source:/home/andre/Documents/CodeBlocks/rci/main.c
+	"cot.h"
+	"udp.h"
+	"select.h"
+
+1679150518 /home/andre/Documents/CodeBlocks/rci/cot.h
+	<stdio.h>
+	<stdlib.h>
+	<sys/types.h>
+	<sys/socket.h>
+	<netdb.h>
+	<string.h>
+	<unistd.h>
+
+1679150518 /home/andre/Documents/CodeBlocks/rci/udp.h
+	<arpa/inet.h>
+
+1679150518 /home/andre/Documents/CodeBlocks/rci/select.h
+	<errno.h>
+	<netinet/in.h>
+	<sys/time.h>
+	<arpa/inet.h>
+
