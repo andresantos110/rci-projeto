@@ -2,12 +2,19 @@
 #include "udp.h"
 #include "select.h"
 
+#ifndef max
+    #define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+
 int main()
 {
     struct node *nodo = (struct node*) malloc (sizeof(struct node));
     char *IP = "127.127.127.127";
     char *TCP = "58001";
     tcpSelect(nodo, IP, TCP);
+    free(nodo);
+
     return 0;
 
 
@@ -47,7 +54,9 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
     FD_SET(server_fd, &read_fds);
     FD_SET(STDIN_FILENO, &read_fds);
 
-    max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
+    //max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
+
+    max_fd = max(server_fd, STDIN_FILENO);
 
     while(1)
     {
@@ -59,7 +68,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
                 FD_SET(fds, &read_fds);  
                  
             if(fds > max_fd)  
-                max_fd = fds;  
+                max_fd = fds;
         }
 
 
@@ -70,6 +79,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
             int client_fd;
             client_fd = accept(server_fd, (struct sockaddr*)&client_addr, & client_addrlen);
             if(client_fd == -1) exit(1);
+
 
             printf("New connection , socket fd is %d , ip is : %s , port : %d\n" , client_fd, inet_ntoa(client_addr.sin_addr) , ntohs
                   (client_addr.sin_port));  
@@ -103,25 +113,27 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
                          
                     //fechar socket 
                     close(fds);  
-                    client_fds[i] = 0;  
-                }  
-                     
+                    num_clients--;
+                    client_fds[i] = -1;  
+                }               
                 //Echo da mensagem
                 else 
                 {  
                     buffer[valread] = '\0';
                     send(fds, buffer , strlen(buffer) , 0 );  
                 } 
+                //if(num_clients == 0) max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
+                if(num_clients == 0) max_fd = max(server_fd, STDIN_FILENO);
             } 
         } 
 
-        /*if (FD_ISSET(STDIN_FILENO, &read_fds))
+        if (FD_ISSET(STDIN_FILENO, &read_fds))
         {
             fgets(buffer, 129, stdin);
             printf("Received input from stdin: %s", buffer);
-        }*/
+        }
 
-        if (FD_ISSET(STDIN_FILENO, &read_fds))
+        /*if (FD_ISSET(STDIN_FILENO, &read_fds))
         {
             fgets(input, sizeof(input), stdin);
 
@@ -137,16 +149,16 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
             }
 
             // Print out the words in the array
-            /*printf("Words in the array:\n");
+            printf("Words in the array:\n");
             for (int i = 0; i < word_count; i++) {
                 printf("%s\n", word_array[i]);
-            }*/
+            }
 
             command = word_array[0];
 
             if(strcmp(command, "join") == 0) printf("Error: Already joined.\n");
             if(strcmp(command, "djoin") == 0) printf("Error: Already joined.\n");
-        }
+        }*/
     }
 
 
