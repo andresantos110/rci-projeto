@@ -90,10 +90,10 @@ int main(int argc, char **argv)
         errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, arg2, IP, TCP); //juntar strings para enviar
         if(errcode >= sizeof(message)) return -1;
 
-        printf("ENVIAR:\n%s", message);
-
         errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
         if(errcode != 0) return -1;
+
+        printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer);
 
         tcpSelect(nodo, IP, TCP);
 
@@ -118,13 +118,7 @@ int main(int argc, char **argv)
         errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, arg2, IP, TCP); //juntar strings para enviar
     }
 
-    if(strcmp(command, "leave") == 0)
-    {
-        //fechar servidor/ligacao TCP
-        //verificar ligacao a outros nós - necessario atribuir backup??
-
-
-    }
+    if(strcmp(command, "leave") == 0) printf("Not yet on the network.");
 
     free(nodo);
 

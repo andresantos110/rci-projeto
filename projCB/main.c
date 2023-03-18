@@ -51,8 +51,6 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
     if(listen(server_fd, 100) == -1) exit(1);
 
     FD_ZERO(&read_fds);
-    FD_SET(server_fd, &read_fds);
-    FD_SET(STDIN_FILENO, &read_fds);
 
     //max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
 
@@ -60,6 +58,8 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 
     while(1)
     {
+        FD_SET(server_fd, &read_fds);
+        FD_SET(STDIN_FILENO, &read_fds);
         for ( i = 0 ; i < 100 ; i++)
         {
             fds = client_fds[i];
@@ -76,6 +76,8 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 
         if(FD_ISSET(server_fd, &read_fds))
         {
+            FD_CLR(server_fd, &read_fds);
+
             int client_fd;
             client_fd = accept(server_fd, (struct sockaddr*)&client_addr, & client_addrlen);
             if(client_fd == -1) exit(1);
@@ -102,6 +104,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 
             if (FD_ISSET(fds, &read_fds))
             {
+                FD_CLR(fds, &read_fds);
 
                 if ((valread = read(fds, buffer, 129)) == 0)
                 {
@@ -129,6 +132,8 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 
         if (FD_ISSET(STDIN_FILENO, &read_fds))
         {
+            FD_CLR(STDIN_FILENO, &read_fds);
+
             fgets(buffer, 129, stdin);
             printf("Received input from stdin: %s", buffer);
         }
