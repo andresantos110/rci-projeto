@@ -109,7 +109,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
                 //Echo da mensagem
                 else 
                 {  
-                    buffer[valread] = '\0';  
+                    buffer[valread] = '\0';
                     send(fds, buffer , strlen(buffer) , 0 );  
                 } 
             } 
@@ -145,7 +145,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
             command = word_array[0];
 
             if(strcmp(command, "join") == 0) printf("Error: Already joined.\n");
-            if(strcmp(command, "djoin") == 0) printf("Error: Already joined.");
+            if(strcmp(command, "djoin") == 0) printf("Error: Already joined.\n");
         }
     }
 
