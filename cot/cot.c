@@ -50,7 +50,9 @@ int main(int argc, char **argv)
         printf("%s\n", word_array[i]);
     }
 
-    if (word_count == 1){
+    command = word_array[0];
+
+    /*if (word_count == 1){
         command = word_array[0];
     }
 
@@ -67,10 +69,12 @@ int main(int argc, char **argv)
         arg3 = word_array[3];
         arg4 = word_array[4];
         arg5 = word_array[5];
-    }
+    }*/
 
     if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
     {
+        arg1 = word_array[1];
+        arg2 = word_array[2];
         if(strlen(arg1) != 3) exit(1);
 
         strcat(message, arg1);
@@ -97,6 +101,21 @@ int main(int argc, char **argv)
         //estabelecer ligacao para nos seguintes
         //definir ext, bck e intr.
         //falta select??? para ver se vai ler do teclado ou receber ligacao
+    }
+
+    if(strcmp(command, "djoin") == 0) //arg1 = net; arg2 = id; arg3 = bootid; arg4 = bootIP; arg5=bootTCP
+    {
+        arg1 = word_array[1];
+        arg2 = word_array[2];
+        arg3 = word_array[3];
+        arg4 = word_array[4];
+        arg5 = word_array[5];
+
+        //necessário preencher estrutura do nodo, abrir servidor TCP e perguntar ao nó dado por bootip e
+        //boottcp o comando EXTERN, informar-se com NEW
+
+        nodo->id = atoi(arg2);
+        errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, arg2, IP, TCP); //juntar strings para enviar
     }
 
     if(strcmp(command, "leave") == 0)

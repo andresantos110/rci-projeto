@@ -20,7 +20,10 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
     int optval = 1;
     int i, fds;
     int valread;
-    char buffer[128+1];
+    char buffer[128+1], input[128+1];
+
+    char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
+
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_addrlen = sizeof(client_addr);
     fd_set read_fds;
@@ -60,8 +63,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
         }
 
 
-        if(select(max_fd +1, &read_fds, NULL, NULL, NULL) == -1) exit(1);
-        
+        if(select(max_fd +1, &read_fds, NULL, NULL, NULL) == -1) exit(1);       
 
         if(FD_ISSET(server_fd, &read_fds))
         {
@@ -90,36 +92,60 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
                  
             if (FD_ISSET(fds, &read_fds))  
             {  
-                //Check if it was for closing , and also read the 
-                //incoming message 
+
                 if ((valread = read(fds, buffer, 129)) == 0)  
                 {  
-                    //Somebody disconnected , get his details and print 
+                    //saiu
                     getpeername(fds, (struct sockaddr*)&server_addr , \
                         (socklen_t*)sizeof(server_addr));  
                     printf("Host disconnected , ip %s , port %d \n" , 
-                          inet_ntoa(server_addr.sin_addr) , ntohs(server_addr.sin_port));  
+                          inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));  
                          
-                    //Close the socket and mark as 0 in list for reuse 
+                    //fechar socket 
                     close(fds);  
                     client_fds[i] = 0;  
                 }  
                      
-                //Echo back the message that came in 
+                //Echo da mensagem
                 else 
                 {  
-                    //set the string terminating NULL byte on the end 
-                    //of the data read 
                     buffer[valread] = '\0';  
                     send(fds, buffer , strlen(buffer) , 0 );  
                 } 
             } 
         } 
 
-        if (FD_ISSET(STDIN_FILENO, &read_fds))
+        /*if (FD_ISSET(STDIN_FILENO, &read_fds))
         {
             fgets(buffer, 129, stdin);
             printf("Received input from stdin: %s", buffer);
+        }*/
+
+        if (FD_ISSET(STDIN_FILENO, &read_fds))
+        {
+            fgets(input, sizeof(input), stdin);
+
+            input[strcspn(input, "\n")] = 0; 
+
+            char *word_array[6]; 
+            int word_count = 0;
+
+            char *token = strtok(input, " ");
+            while (token != NULL && word_count < 20) {
+                word_array[word_count++] = token;
+                token = strtok(NULL, " ");
+            }
+
+            // Print out the words in the array
+            /*printf("Words in the array:\n");
+            for (int i = 0; i < word_count; i++) {
+                printf("%s\n", word_array[i]);
+            }*/
+
+            command = word_array[0];
+
+            if(strcmp(command, "join") == 0) printf("Error: Already joined.\n");
+            if(strcmp(command, "djoin") == 0) printf("Error: Already joined.");
         }
     }
 

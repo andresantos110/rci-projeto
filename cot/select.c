@@ -24,7 +24,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 
     if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) exit(1);
 
-    for (int i = 0; i < 100; i++) client_fds[i] = -1;
+    for (int i = 0; i < 100; i++) client_fds[i] = 0;
 
     if(listen(server_fd, 100) == -1) exit(1);
 
@@ -36,22 +36,19 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 
     while(1)
     {
-        if(select(max_fd +1, &read_fds, NULL, NULL, NULL) == -1) exit(1);
-
-                //add child sockets to set 
         for ( i = 0 ; i < 100 ; i++)  
         {  
-            //socket descriptor 
             fds = client_fds[i];  
                  
-            //if valid socket descriptor then add to read list 
             if(fds > 0)  
                 FD_SET(fds, &read_fds);  
                  
-            //highest file descriptor number, need it for the select function 
             if(fds > max_fd)  
                 max_fd = fds;  
         }
+
+
+        if(select(max_fd +1, &read_fds, NULL, NULL, NULL) == -1) exit(1);
         
 
         if(FD_ISSET(server_fd, &read_fds))
@@ -60,9 +57,12 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
             client_fd = accept(server_fd, (struct sockaddr*)&client_addr, & client_addrlen);
             if(client_fd == -1) exit(1);
 
+            printf("New connection , socket fd is %d , ip is : %s , port : %d\n" , client_fd, inet_ntoa(client_addr.sin_addr) , ntohs
+                  (client_addr.sin_port));  
+
             for (int i = 0; i < 100; i++)
             {
-                if (client_fds[i] == -1)
+                if (client_fds[i] == 0)
                 {
                     client_fds[i] = client_fd;
                     num_clients++;
@@ -71,36 +71,33 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
             }
         }
 
-        //else its some IO operation on some other socket
+        //else some other socket
         for (i = 0; i < 100; i++)  
         {  
             fds = client_fds[i];  
                  
             if (FD_ISSET(fds, &read_fds))  
             {  
-                //Check if it was for closing , and also read the 
-                //incoming message 
+
                 if ((valread = read(fds, buffer, 129)) == 0)  
                 {  
-                    //Somebody disconnected , get his details and print 
+                    //saiu
                     getpeername(fds, (struct sockaddr*)&server_addr , \
                         (socklen_t*)sizeof(server_addr));  
                     printf("Host disconnected , ip %s , port %d \n" , 
-                          inet_ntoa(server_addr.sin_addr) , ntohs(server_addr.sin_port));  
+                          inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));  
                          
-                    //Close the socket and mark as 0 in list for reuse 
+                    //fechar socket 
                     close(fds);  
                     client_fds[i] = 0;  
                 }  
                      
-                //Echo back the message that came in 
+                //Echo da mensagem
                 else 
                 {  
-                    //set the string terminating NULL byte on the end 
-                    //of the data read 
                     buffer[valread] = '\0';  
                     send(fds, buffer , strlen(buffer) , 0 );  
-                }  
+                } 
             } 
         } 
 
