@@ -127,7 +127,6 @@ int main(int argc, char **argv)
             strcpy(line, "\0");
         }
 
-
         //ler ip e porta do externo caso exista (nao existe para o primeiro nó) para passar para a funcao select 
 
         errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, IP, TCP); //juntar strings para enviar
