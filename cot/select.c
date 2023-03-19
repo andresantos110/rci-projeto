@@ -1,5 +1,6 @@
 #include "cot.h"
 #include "select.h"
+#include "udp.h"
 
 void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], char regIP[16], char regUDP[16])
 {
@@ -30,7 +31,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
     server_addr.sin_addr.s_addr = INADDR_ANY; //aceitar de qualquer ip
     server_addr.sin_port = htons(atoi(TCP)); //port
 
-    if(strcmp(infoExt, "\0") != 0) // verificar se é primeiro nó, entra no if se nao for
+    /*if(strcmp(infoExt, "\0") != 0) // verificar se é primeiro nó, entra no if se nao for
     {
         sscanf(infoExt, "%s %s %s", nodo->ext, ipExt, tcpExt);
         external_addr.sin_family = AF_INET; //IPv4
@@ -39,7 +40,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
         if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
         snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, IP, TCP);
         send(selfClient_fd, message , strlen(message) , 0 ); 
-    }
+    }*/
 
     if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) exit(1);
 
@@ -58,7 +59,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
 
         FD_SET(server_fd, &read_fds);
         FD_SET(STDIN_FILENO, &read_fds);
-        if(strcmp(nodo->ext, "\0") == 0) FD_SET(selfClient_fd, &read_fds);
+        //if(strcmp(nodo->ext, "\0") == 0) FD_SET(selfClient_fd, &read_fds);
 
         for ( i = 0 ; i < 100 ; i++)  
         {  
@@ -119,10 +120,13 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
                     num_clients--;
                     client_fds[i] = -1;  
                 }               
-                //Echo da mensagem - a mudar para comunicacao
+                //Comunicação entre nós
                 else 
                 {  
-                    if(strstr(buffer, "NEW") != NULL)
+
+                    buffer[valread] = '\0';
+                    send(fds, buffer , strlen(buffer) , 0 );
+                    /*if(strstr(buffer, "NEW") != NULL)
                     {
                         if(strcmp(nodo->ext, "\0"))
                         {
@@ -140,7 +144,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
                         {
                             //caso nao seja o primeiro nó
                         }
-                    }  
+                    }*/ 
                 } 
                 //if(num_clients == 0) max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
                 if(num_clients == 0) max_fd = max(server_fd, STDIN_FILENO);
@@ -183,7 +187,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
 
 }
 
-void commTCP(int fd)
+/*void commTCP(int fd)
 {
 
-}
+}*/
