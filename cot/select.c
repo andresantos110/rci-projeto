@@ -1,7 +1,7 @@
 #include "cot.h"
 #include "select.h"
 
-void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32])
+void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], char regIP[16], char regUDP[16])
 {
     int server_fd, max_fd, selfClient_fd, client_fds[100];
     int num_clients = 0;
@@ -167,6 +167,14 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32])
 
             if(strcmp(command, "join") == 0) printf("Error: Already joined.\n");
             if(strcmp(command, "djoin") == 0) printf("Error: Already joined.\n");
+            if(strcmp(command, "leave") == 0)
+            {
+                arg1 = word_array[1];
+                if(snprintf(message, sizeof(message), "%s %s %s", "UNREG", arg1, nodo->id) !=0) exit(1);
+                if(commUDP(message, buffer, regIP, regUDP) != 0) exit(1);
+                printf("Enviada: %s\nRecebida: %s\n", message, buffer);
+                if(strcmp(buffer, "OKUNREG") == 0) printf("Unreg successful.");     
+            }
         }
     }
 
