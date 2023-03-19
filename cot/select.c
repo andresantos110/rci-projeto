@@ -1,7 +1,7 @@
 #include "cot.h"
 #include "select.h"
 
-void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
+void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32])
 {
     int server_fd, max_fd, selfClient_fd, client_fds[100];
     int num_clients = 0;
@@ -9,6 +9,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
     int i, fds;
     int valread;
     char buffer[128+1], input[128+1];
+    char ipExt[16], tcpExt[6];
 
     char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
 
@@ -19,15 +20,22 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
     server_fd = socket(AF_INET,SOCK_STREAM,0); //abrir socket TCP
     if(server_fd == -1) exit(1);
 
+    selfClient_fd = socket(AF_INET,SOCK_STREAM,0); //abrir socket TCP de cliente(self)
+    if(server_fd == -1) exit(1);
+
     if(setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) exit(1);
 
     server_addr.sin_family = AF_INET; //IPv4
     server_addr.sin_addr.s_addr = INADDR_ANY; //aceitar de qualquer ip
     server_addr.sin_port = htons(atoi(TCP)); //port
 
-    external_addr.sin_family = AF_INET; //IPv4
-    external_addr.sin_addr.s_addr = INADDR_ANY; //PREENCHER COM IP DO EXTERNO
-    external_addr.sin_port = htons(atoi(TCP)); //PORTA DO EXTERNO
+    if(strcmp(infoExt, "\0") != 0) // verificar se é primeiro nó, entra no if se nao for
+    {
+        sscanf(infoExt, "%s %s %s", nodo->ext, ipExt, tcpExt);
+        external_addr.sin_family = AF_INET; //IPv4
+        external_addr.sin_addr.s_addr = inet_addr(ipExt); //PREENCHER COM IP DO EXTERNO
+        external_addr.sin_port = htons(atoi(tcpExt)); //PORTA DO EXTERNO
+    }
 
     if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) exit(1);
 

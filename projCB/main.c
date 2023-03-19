@@ -9,11 +9,20 @@
 
 int main()
 {
-    struct node *nodo = (struct node*) malloc (sizeof(struct node));
+    /*struct node *nodo = (struct node*) malloc (sizeof(struct node));
     char *IP = "127.127.127.127";
     char *TCP = "58001";
     tcpSelect(nodo, IP, TCP);
-    free(nodo);
+    free(nodo);*/
+
+    char buffer[128+1] = "NODESLIST 105\n03 192.168.1.2 58001\n01 192.168.1.3 58001";
+    int nNodes = 2;
+    char node[02+1] = "03";
+    char line[32];
+    if(line[0] = "\0") printf("funcuiona");
+    printf("BEFORE: %s\ SIZE: %ld\n", line, sizeof(line));
+    findNode(buffer, line, nNodes, node);
+    printf("AFTER: %s\ SIZE: %ld\n", line, sizeof(line));
 
     return 0;
 
@@ -168,5 +177,25 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 
 
 
+
+}
+
+void findNode(char buffer[], char line[], int nNodes, char node [])
+{
+    char *auxString, el1[4], el2[16], el3[6];
+    int i;
+
+    auxString = strtok(buffer, "\n");
+    printf("BUFFER: %s\nNODE: %s\n", auxString, node);
+
+    for(i = 0; i < nNodes; i++)
+    {
+        auxString = strtok(NULL, "\n");
+        printf("%s\n", auxString);
+        sscanf(auxString, "%s %s %s", el1, el2, el3);
+        printf("%s\n%s\n%s\n", el1, el2, el3);
+        if(strcmp(el1, node) == 0) strcpy(line, auxString);
+
+    }
 
 }

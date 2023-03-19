@@ -1,6 +1,7 @@
 #include "cot.h"
 #include "udp.h"
 #include "select.h"
+#include "aux.h"
 
 int main(int argc, char **argv)
 {
@@ -8,6 +9,7 @@ int main(int argc, char **argv)
     char buffer[128+1];
     char message[128+1] = "NODES ";
     char input[128];
+    char line[32];
     char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
     int errcode, i;
     int nNodes = 0;
@@ -49,12 +51,6 @@ int main(int argc, char **argv)
         token = strtok(NULL, " ");
     }
 
-    // Print out the words in the array
-    printf("Words in the array:\n");
-    for (int i = 0; i < word_count; i++) {
-        printf("%s\n", word_array[i]);
-    }
-
     command = word_array[0];
 
     /*if (word_count == 1){
@@ -94,8 +90,9 @@ int main(int argc, char **argv)
 
         if(nNodes < 2) strcpy(nodo->bck, arg2); //else o backup vai ser o externo do externo, a preencher depois
 
+        findNode(buffer, line, nNodes, arg2);
 
-        if(strstr(buffer, arg2) != NULL) //verificar se nó já existe PODE DAR MERDA COM A PORTA
+        if(strcmp(line, "\0") != 0)
         {
             sprintf(nodo->id, "%d", atoi(arg2)+1);
             if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
@@ -108,18 +105,28 @@ int main(int argc, char **argv)
         }
         else strcpy(nodo->id, arg2);
 
-        while(strlen(input) != 3)
+
+        if(nNodes != 0)
         {
-            printf("Select the node to connect to:\n");
-            fgets(input, sizeof(input), stdin);
-            sscanf(input, "%s", nodo->ext);
-            if(strlen(input) != 3) printf("Please enter two characters.\n");
-            if(strstr(buffer, nodo->ext) == NULL) //PODE DAR MERDA COM A PORTA
+            while(strlen(input) != 3)
             {
-                printf("Node does not exist. Try again.\n");
-                sscanf("ERROR", "%s", input);
+                printf("Select the node to connect to:\n");
+                fgets(input, sizeof(input), stdin);
+                sscanf(input, "%s", nodo->ext);
+                if(strlen(input) != 3) printf("Please enter two characters.\n");
+                findNode(buffer, line, nNodes, nodo->ext);
+                if(strcmp(line, "\0") == 0)
+                {
+                    printf("Node does not exist. Try again.\n");
+                    sscanf("ERROR", "%s", input);
+                }
             }
         }
+        else
+        {
+            strcpy(line, "\0");
+        }
+
 
         //ler ip e porta do externo caso exista (nao existe para o primeiro nó) para passar para a funcao select 
 
@@ -131,7 +138,7 @@ int main(int argc, char **argv)
 
         printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer); //substituir por receção de OKREG
 
-        tcpSelect(nodo, IP, TCP);
+        tcpSelect(nodo, IP, TCP, line);
     }
 
     if(strcmp(command, "djoin") == 0) //arg1 = net; arg2 = id; arg3 = bootid; arg4 = bootIP; arg5=bootTCP
@@ -164,3 +171,5 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
+

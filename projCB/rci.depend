@@ -22,3 +22,26 @@
 	<sys/time.h>
 	<arpa/inet.h>
 
+1679232634 source:/home/andre/Documents/GitHub/rci-projeto/projCB/main.c
+	"cot.h"
+	"udp.h"
+	"select.h"
+
+1679150518 /home/andre/Documents/GitHub/rci-projeto/projCB/cot.h
+	<stdio.h>
+	<stdlib.h>
+	<sys/types.h>
+	<sys/socket.h>
+	<netdb.h>
+	<string.h>
+	<unistd.h>
+
+1679150518 /home/andre/Documents/GitHub/rci-projeto/projCB/udp.h
+	<arpa/inet.h>
+
+1679232605 /home/andre/Documents/GitHub/rci-projeto/projCB/select.h
+	<errno.h>
+	<netinet/in.h>
+	<sys/time.h>
+	<arpa/inet.h>
+
