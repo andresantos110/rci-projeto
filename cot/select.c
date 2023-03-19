@@ -3,7 +3,7 @@
 
 void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 {
-    int server_fd, max_fd, client_fds[100];
+    int server_fd, max_fd, selfClient_fd, client_fds[100];
     int num_clients = 0;
     int optval = 1;
     int i, fds;
@@ -12,7 +12,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
 
     char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
 
-    struct sockaddr_in server_addr, client_addr;
+    struct sockaddr_in server_addr, client_addr, external_addr;
     socklen_t client_addrlen = sizeof(client_addr);
     fd_set read_fds;
 
@@ -24,6 +24,10 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
     server_addr.sin_family = AF_INET; //IPv4
     server_addr.sin_addr.s_addr = INADDR_ANY; //aceitar de qualquer ip
     server_addr.sin_port = htons(atoi(TCP)); //port
+
+    external_addr.sin_family = AF_INET; //IPv4
+    external_addr.sin_addr.s_addr = INADDR_ANY; //PREENCHER COM IP DO EXTERNO
+    external_addr.sin_port = htons(atoi(TCP)); //PORTA DO EXTERNO
 
     if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) exit(1);
 
@@ -101,7 +105,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6])
                     num_clients--;
                     client_fds[i] = -1;  
                 }               
-                //Echo da mensagem
+                //Echo da mensagem - a mudar para comunicacao
                 else 
                 {  
                     buffer[valread] = '\0';

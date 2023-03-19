@@ -7,8 +7,8 @@
 #include <unistd.h>
 
 struct node{
-    char id;
-    char ext;
-    char bck;
+    char *id;
+    char *ext;
+    char *bck;
     int intr[128+1];
 };
