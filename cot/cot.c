@@ -18,6 +18,7 @@ int main(int argc, char **argv)
     nodo->id = calloc(2, sizeof(char));
     nodo->ext = calloc(2, sizeof(char));
     nodo->bck = calloc(2, sizeof(char));
+    nodo->ncontents = 0;
 
 
 
@@ -35,23 +36,6 @@ int main(int argc, char **argv)
 
     strcpy(IP, argv[1]);
     strcpy(TCP, argv[2]);
-
-
-    printf("Enter a command: \n");
-    fgets(input, sizeof(input), stdin);
-
-    input[strcspn(input, "\n")] = 0; 
-
-    char *word_array[6]; 
-    int word_count = 0;
-
-    char *token = strtok(input, " ");
-    while (token != NULL && word_count < 20) {
-        word_array[word_count++] = token;
-        token = strtok(NULL, " ");
-    }
-
-    command = word_array[0];
 
     /*if (word_count == 1){
         command = word_array[0];
@@ -72,95 +56,151 @@ int main(int argc, char **argv)
         arg5 = word_array[5];
     }*/
 
-    if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
+    //ADICIONAR WHILE PARA NAO SAIR DO PROGRAMA DEPOIS DE 1 COMANDO
+    while(1)
     {
-        arg1 = word_array[1];
-        arg2 = word_array[2];
-        if(strlen(arg1) != 3) exit(1);
 
-        strcat(message, arg1);
+        printf("Enter a command: \n");
+        fgets(input, sizeof(input), stdin);
 
-        errcode = commUDP(message, buffer, regIP, regUDP);
-        if(errcode != 0) return -1;
+        input[strcspn(input, "\n")] = 0; 
 
-        printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
+        char *word_array[6]; 
+        int word_count = 0;
 
-        for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
-        printf("Número de nós: %d\n", nNodes);
-
-        if(nNodes < 2) strcpy(nodo->bck, arg2); //else o backup vai ser o externo do externo, a preencher depois
-
-        findNode(buffer, line, nNodes, arg2);
-
-        if(strcmp(line, "\0") != 0)
-        {
-            sprintf(nodo->id, "%d", atoi(arg2)+1);
-            if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
-            {
-                strcpy(arg2, "0");
-                strcat(arg2, nodo->id);
-                strcpy(nodo->id, arg2);
-            }
-            printf("Node already exists. New id: %s\n", nodo->id);
+        char *token = strtok(input, " ");
+        while (token != NULL && word_count < 20) {
+            word_array[word_count++] = token;
+            token = strtok(NULL, " ");
         }
-        else strcpy(nodo->id, arg2);
 
+        command = word_array[0];
 
-        if(nNodes != 0)
+        if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
         {
-            while(strlen(input) != 3)
+            arg1 = word_array[1];
+            arg2 = word_array[2];
+            if(strlen(arg1) != 3) exit(1);
+
+            strcat(message, arg1);
+
+            errcode = commUDP(message, buffer, regIP, regUDP);
+            if(errcode != 0) return -1;
+
+            printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
+
+            for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
+            printf("Número de nós: %d\n", nNodes);
+
+            if(nNodes < 2) strcpy(nodo->bck, arg2); //else o backup vai ser o externo do externo, a preencher depois
+
+            findNode(buffer, line, nNodes, arg2);
+
+            if(strcmp(line, "\0") != 0)
             {
-                printf("Select the node to connect to:\n");
-                fgets(input, sizeof(input), stdin);
-                sscanf(input, "%s", nodo->ext);
-                if(strlen(input) != 3) printf("Please enter two characters.\n");
-                findNode(buffer, line, nNodes, nodo->ext);
-                if(strcmp(line, "\0") == 0)
+                sprintf(nodo->id, "%d", atoi(arg2)+1);
+                if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
                 {
-                    printf("Node does not exist. Try again.\n");
-                    sscanf("ERROR", "%s", input);
+                    strcpy(arg2, "0");
+                    strcat(arg2, nodo->id);
+                    strcpy(nodo->id, arg2);
+                }
+                printf("Node already exists. New id: %s\n", nodo->id);
+            }
+            else strcpy(nodo->id, arg2);
+
+
+            if(nNodes != 0)
+            {
+                while(strlen(input) != 3)
+                {
+                    printf("Select the node to connect to:\n");
+                    fgets(input, sizeof(input), stdin);
+                    sscanf(input, "%s", nodo->ext);
+                    if(strlen(input) != 3) printf("Please enter two characters.\n");
+                    findNode(buffer, line, nNodes, nodo->ext);
+                    if(strcmp(line, "\0") == 0)
+                    {
+                        printf("Node does not exist. Try again.\n");
+                        sscanf("ERROR", "%s", input);
+                    }
                 }
             }
+            else
+            {
+                strcpy(line, "\0");
+            }
+
+            //ler ip e porta do externo caso exista (nao existe para o primeiro nó) para passar para a funcao select 
+
+            errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, IP, TCP); //juntar strings para enviar
+            if(errcode >= sizeof(message)) return -1;
+
+            errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
+            if(errcode != 0) return -1;
+
+            printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer); //substituir por receção de OKREG
+
+            tcpSelect(nodo, IP, TCP, line, regIP, regUDP);
         }
-        else
+
+        if(strcmp(command, "djoin") == 0) //arg1 = net; arg2 = id; arg3 = bootid; arg4 = bootIP; arg5=bootTCP
         {
-            strcpy(line, "\0");
+            arg1 = word_array[1];
+            arg2 = word_array[2];
+            arg3 = word_array[3];
+            arg4 = word_array[4];
+            arg5 = word_array[5];
+
+            //necessário preencher estrutura do nodo, abrir servidor TCP e perguntar ao nó dado por bootip e
+            //boottcp o comando EXTERN, informar-se com NEW
+
+            nodo->id = arg2;
+            errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, arg2, IP, TCP); //juntar strings para enviar
         }
 
-        //ler ip e porta do externo caso exista (nao existe para o primeiro nó) para passar para a funcao select 
-
-        errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, IP, TCP); //juntar strings para enviar
-        if(errcode >= sizeof(message)) return -1;
-
-        errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
-        if(errcode != 0) return -1;
-
-        printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer); //substituir por receção de OKREG
-
-        tcpSelect(nodo, IP, TCP, line, regIP, regUDP);
+        if(strcmp(command, "leave") == 0) printf("Not yet on the network.");
+        if(strcmp(command, "st") == 0) printf("Not yet on the network.");
+        if(strcmp(command, "sr") == 0) printf("Not yet on the network.");
+        if(strcmp(command, "get") == 0) printf("Not yet on the network.");
+        if(strcmp(command, "exit") == 0)
+        {
+            free(nodo->id);
+            free(nodo->ext);
+            free(nodo->bck);
+            free(nodo);
+            return 0;
+        }
+        if(strcmp(command, "create") == 0)
+        {
+            arg1 = word_array[1];
+            nodo->content[1] = calloc(strlen(arg1)+1, sizeof(char));
+            strcpy(nodo->content[1], arg1);
+            nodo->ncontents++;
+            printf("Content %s added. Number of contents: %d.\n", nodo->content[1], nodo->ncontents);
+        }
+        if(strcmp(command, "delete") == 0)
+        {
+            //todo
+            //alterar estrutura do nó para guardar lista de conteudos - lista de strings
+            //cada conteudo vai ser uma string
+            printf("Not yet implemented.");
+            //strcpy de \0 para a string
+            //limpar memoria
+        }
+            if(strcmp(command, "sn") == 0)
+        {
+            //todo
+            //percorrer lista de conteudos e dar print das strings
+            printf("Not yet implemented.");
+        }
     }
 
-    if(strcmp(command, "djoin") == 0) //arg1 = net; arg2 = id; arg3 = bootid; arg4 = bootIP; arg5=bootTCP
-    {
-        arg1 = word_array[1];
-        arg2 = word_array[2];
-        arg3 = word_array[3];
-        arg4 = word_array[4];
-        arg5 = word_array[5];
 
-        //necessário preencher estrutura do nodo, abrir servidor TCP e perguntar ao nó dado por bootip e
-        //boottcp o comando EXTERN, informar-se com NEW
-
-        nodo->id = arg2;
-        errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, arg2, IP, TCP); //juntar strings para enviar
-    }
-
-    if(strcmp(command, "leave") == 0) printf("Not yet on the network.");
-
-    free(nodo->id);
+    /*free(nodo->id);
     free(nodo->ext);
     free(nodo->bck);
-    free(nodo);
+    free(nodo);*/
 
 
     //errcode = commUDP(message, buffer, regIP, regUDP);

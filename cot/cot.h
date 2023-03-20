@@ -11,4 +11,6 @@ struct node{
     char *ext;
     char *bck;
     int intr[128+1];
+    char *content[32]; //max de 32 conteudos
+    int ncontents;
 };
