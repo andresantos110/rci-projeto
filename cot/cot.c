@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 
         printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer); //substituir por receção de OKREG
 
-        tcpSelect(nodo, IP, TCP, line);
+        tcpSelect(nodo, IP, TCP, line, regIP, regUDP);
     }
 
     if(strcmp(command, "djoin") == 0) //arg1 = net; arg2 = id; arg3 = bootid; arg4 = bootIP; arg5=bootTCP

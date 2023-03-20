@@ -2,7 +2,7 @@
 #include "select.h"
 #include "udp.h"
 
-void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], char regIP[16], char regUDP[16])
+void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], char regIP[16], char regUDP[6])
 {
     int server_fd, max_fd, selfClient_fd, client_fds[100];
     int num_clients = 0;
