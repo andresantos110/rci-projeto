@@ -170,6 +170,7 @@ int main(int argc, char **argv)
             free(nodo->bck);
             free(nodo);
             return 0;
+            //free memoria conteudos?
         }
         if(strcmp(command, "create") == 0)
         {
@@ -181,10 +182,22 @@ int main(int argc, char **argv)
         }
         if(strcmp(command, "delete") == 0)
         {
+            if(nodo->ncontents == 0) printf("There are no contents.");
+            arg1 = word_array[1];
+            for(i=0;i<nodo->ncontents;i++)
+            {
+                if(strcmp(nodo->content[i], arg1) == 0)
+                {
+                    strcpy(nodo->content[i], "\0");
+                    free(nodo->content[i]);
+                    printf("Content %s deleted.", arg1);
+                    break;
+                }
+            }
+            if(i == nodo->ncontents) printf("Content not found.");
             //todo
             //alterar estrutura do nó para guardar lista de conteudos - lista de strings
             //cada conteudo vai ser uma string
-            printf("Not yet implemented.");
             //strcpy de \0 para a string
             //limpar memoria
         }
