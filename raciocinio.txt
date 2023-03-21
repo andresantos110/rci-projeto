@@ -26,4 +26,4 @@ ordem:
 2. saida de nó
 3. tabelas de expedicao, procura de conteudos.
 
-
+para saber a que fd corresponde cada nó, guarda em intr[fd] o id do nó
