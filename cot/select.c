@@ -9,7 +9,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
     int optval = 1;
     int i, fds;
     int valread;
-    char buffer[128+1], input[128+1], message[128+1];
+    char buffer[1024+1], input[128+1], message[128+1];
     char ipExt[16], tcpExt[6];
     char auxIP[16], auxTCP[6];
 
@@ -75,7 +75,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
 
         if(select(max_fd +1, &read_fds, NULL, NULL, NULL) == -1) exit(1);       
 
-        if(FD_ISSET(server_fd, &read_fds))
+        if(FD_ISSET(server_fd, &read_fds)) //ligacao ao servidor
         {
             FD_CLR(server_fd, &read_fds);
 
@@ -98,8 +98,12 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
             }
         }
 
-        //else some other socket
-        for (i = 0; i < 100; i++)  
+        if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo
+        {
+
+        }
+
+        for (i = 0; i < 100; i++) //atividade num interno
         {  
             fds = client_fds[i];  
                  
@@ -173,7 +177,33 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
 
 }
 
-/*void commTCP(int fd)
+int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividade no fd de uma ligacao tcp.
 {
+    char buffer[1024+1];
+    char command[16], arg1[32], arg2[32], arg3[32];
 
-}*/
+    //verificar se foi saída
+    if(read(fds, buffer, 129) == 0)
+    {
+
+    }
+    else
+    {
+        /*verificar o que recebeu
+            new
+            extern
+            withdraw
+            query
+            content
+            nocontent
+        */
+        if(strstr(buffer, "NEW") != NULL)
+        {
+            //arg1 = id; arg2 = IP; arg3 = TCP     
+            //sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
+
+            //send(fd,)
+        }
+    }
+
+}
