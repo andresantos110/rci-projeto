@@ -6,7 +6,7 @@
 int main(int argc, char **argv)
 {
     char regIP[16], regUDP[6], IP[16], TCP[6];
-    char buffer[128+1];
+    char buffer[1024+1];
     char message[128+1] = "NODES ";
     char input[128];
     char line[32];
@@ -146,9 +146,12 @@ int main(int argc, char **argv)
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
             if(errcode != 0) return -1;
 
-            //printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer); //substituir por receção de OKREG
-
-            tcpSelect(nodo, IP, TCP, line, regIP, regUDP);
+            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, IP, TCP, line, regIP, regUDP);
+            else
+            {
+                printf("UDP Error.");
+                exit(1);
+            }
         }
 
         if(strcmp(command, "djoin") == 0) //arg1 = net; arg2 = id; arg3 = bootid; arg4 = bootIP; arg5=bootTCP
@@ -163,7 +166,7 @@ int main(int argc, char **argv)
             //boottcp o comando EXTERN, informar-se com NEW
 
             nodo->id = arg2;
-            errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, arg2, IP, TCP); //juntar strings para enviar
+            errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, IP, TCP); //juntar strings para enviar
         }
 
         if(strcmp(command, "leave") == 0) printf("Not yet on the network.");

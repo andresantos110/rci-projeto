@@ -24,7 +24,7 @@ int commUDP(char mensagem[], char buffer[], char regIP[], char regUDP[])
     if(n == -1) exit (1);
 
     addrlen=sizeof(addr);
-    n = recvfrom(fd, buffer, 128, 0, &addr, &addrlen); //receber mensagem
+    n = recvfrom(fd, buffer, 1024, 0, &addr, &addrlen); //receber mensagem
     if(n == -1) exit (1);
 
     struct sockaddr_in *addr_in = (struct sockaddr_in *)&addr; //verificar se mensagem vem de destinatário
