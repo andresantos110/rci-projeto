@@ -78,6 +78,11 @@ int main(int argc, char **argv)
 
         if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
         {
+            if(word_count != 3)
+            {
+                printf("Arguments missing. Exiting.\n");
+                exit(1);
+            }
             arg1 = word_array[1];
             arg2 = word_array[2];
             if(strlen(arg1) != 3) exit(1);
@@ -87,12 +92,10 @@ int main(int argc, char **argv)
             errcode = commUDP(message, buffer, regIP, regUDP);
             if(errcode != 0) return -1;
 
-            printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
+            //printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
 
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
-            printf("Número de nós: %d\n", nNodes);
-
-            if(nNodes < 2) strcpy(nodo->bck, arg2); //else o backup vai ser o externo do externo, a preencher depois
+            printf("Number of nodes in the network: %d\n", nNodes);
 
             findNode(buffer, line, nNodes, arg2);
 
@@ -108,6 +111,8 @@ int main(int argc, char **argv)
                 printf("Node already exists. New id: %s\n", nodo->id);
             }
             else strcpy(nodo->id, arg2);
+
+            strcpy(nodo->bck, nodo->id);
 
 
             if(nNodes != 0)
@@ -131,15 +136,17 @@ int main(int argc, char **argv)
                 strcpy(line, "\0");
             }
 
-            //ler ip e porta do externo caso exista (nao existe para o primeiro nó) para passar para a funcao select 
+            //se line="\0" entao é o primeiro nó
 
             errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, IP, TCP); //juntar strings para enviar
             if(errcode >= sizeof(message)) return -1;
 
+            printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
+
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
             if(errcode != 0) return -1;
 
-            printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer); //substituir por receção de OKREG
+            //printf("Enviada:\n%s\nRecebida:\n%s\n", message, buffer); //substituir por receção de OKREG
 
             tcpSelect(nodo, IP, TCP, line, regIP, regUDP);
         }
