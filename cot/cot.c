@@ -218,12 +218,19 @@ int main(int argc, char **argv)
         }
             if(strcmp(command, "sn") == 0)
         {
-            //todo
-            //percorrer lista de conteudos e dar print das strings
-            printf("Not yet implemented.");
+            if(nodo->ncontents == 0) printf("No contents in node.\n");
+            else
+            {
+                printf("List of contents:\n");
+                for(i=0;i<nodo->ncontents;i++)
+                {
+                    printf("%d. %s\n", i, nodo->content[i]);
+                }
+            }
         }
     }
 
+    //elsifs para comando nao reconhecido?
 
     /*free(nodo->id);
     free(nodo->ext);
