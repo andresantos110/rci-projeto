@@ -2,7 +2,7 @@
 #include "select.h"
 #include "udp.h"
 
-void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], char regIP[16], char regUDP[6])
+void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char regUDP[6])
 {
     int server_fd, max_fd, selfClient_fd, client_fds[100];
     int num_clients = 0;
@@ -22,21 +22,20 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
     server_fd = socket(AF_INET,SOCK_STREAM,0); //abrir socket TCP
     if(server_fd == -1) exit(1);
 
-    selfClient_fd = socket(AF_INET,SOCK_STREAM,0); //abrir socket TCP de cliente(self)
-    if(server_fd == -1) exit(1);
-
     if(setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) exit(1);
 
     server_addr.sin_family = AF_INET; //IPv4
     server_addr.sin_addr.s_addr = INADDR_ANY; //aceitar de qualquer ip
     server_addr.sin_port = htons(atoi(TCP)); //port
 
-    if(strcmp(infoExt, "\0") != 0) // verificar se é primeiro nó, entra no if se nao for
-    {
-        sscanf(infoExt, "%s %s %s", nodo->ext, ipExt, tcpExt);
+    if(strcmp(nodo->ext, "-1") != 0) // verificar se é primeiro nó, entra no if se nao for
+    {  
+        selfClient_fd = socket(AF_INET,SOCK_STREAM,0); //abrir socket TCP de cliente(self)
+        if(selfClient_fd == -1) exit(1);
+
         external_addr.sin_family = AF_INET; //IPv4
-        external_addr.sin_addr.s_addr = inet_addr(ipExt); //IP DO EXTERNO
-        external_addr.sin_port = htons(atoi(tcpExt)); //PORTA DO EXTERNO
+        external_addr.sin_addr.s_addr = inet_addr(nodo->ipExt); //IP DO EXTERNO
+        external_addr.sin_port = htons(atoi(nodo->portExt)); //PORTA DO EXTERNO
         if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
         snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, IP, TCP);
         send(selfClient_fd, message , strlen(message) , 0 ); 
@@ -100,6 +99,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
 
         if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo
         {
+            FD_CLR(selfClient_fd, &read_fds);
 
         }
 
@@ -198,14 +198,26 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
             content
             nocontent
         */
-        /*if(strstr(buffer, "NEW") != NULL) //se for new
+        if(strstr(buffer, "NEW") != NULL) //se for new
         {
-            //arg1 = id; arg2 = IP; arg3 = TCP     
+            //arg1 = id; arg2 = IP; arg3 = TCP
+            if(strcmp(nodo->ext, "-1") == 0)
+            {
+                printf("Todo - primeiro nó quando recebe new");
+            }
+            else //se nao for o primeiro nó
+            {
+                sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
+                strcpy(nodo->intr[atoi(fd)], arg1);
+                snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
+                send(fd, message, strlen(message), 0);
+            }
+        }
+        if(strstr(buffer, "EXTERN") != NULL) //se for null
+        {
             sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-            strcpy(nodo->intr[atoi(fd)], arg1);
-            snprintf(message, sizeof(message), "%s %s %s", "EXTERN", nodo->ext, )
-            //send(fd,)
-        }*/
+            strcpy(nodo->bck, arg1);
+        }
     }
 
 }

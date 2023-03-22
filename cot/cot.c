@@ -97,26 +97,31 @@ int main(int argc, char **argv)
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
             printf("Number of nodes in the network: %d\n", nNodes);
 
-            findNode(buffer, line, nNodes, arg2);
-
-            if(strcmp(line, "\0") != 0)
+            if(nNodes == 0)
             {
-                sprintf(nodo->id, "%d", atoi(arg2)+1);
-                if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
-                {
-                    strcpy(arg2, "0");
-                    strcat(arg2, nodo->id);
-                    strcpy(nodo->id, arg2);
-                }
-                printf("Node already exists. New id: %s\n", nodo->id);
+                printf("Todo, primeiro nó");
+                strcpy(nodo->ext, "-1");
             }
-            else strcpy(nodo->id, arg2);
-
-            strcpy(nodo->bck, nodo->id);
-
-
-            if(nNodes != 0)
+            
+            else
             {
+                findNode(buffer, line, nNodes, arg2);
+
+                if(strcmp(line, "\0") != 0)
+                {
+                    sprintf(nodo->id, "%d", atoi(arg2)+1);
+                    if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
+                    {
+                        strcpy(arg2, "0");
+                        strcat(arg2, nodo->id);
+                        strcpy(nodo->id, arg2);
+                    }
+                    printf("Node already exists. New id: %s\n", nodo->id);
+                }
+                else strcpy(nodo->id, arg2);
+
+                strcpy(nodo->bck, nodo->id);
+
                 while(strlen(input) != 3)
                 {
                     printf("Select the node to connect to:\n");
@@ -130,13 +135,8 @@ int main(int argc, char **argv)
                         sscanf("ERROR", "%s", input);
                     }
                 }
+                sscanf(line, "%s %s %s", nodo->ext, nodo->ipExt, nodo->portExt);
             }
-            else
-            {
-                strcpy(line, "\0");
-            }
-
-            //se line="\0" entao é o primeiro nó
 
             errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, IP, TCP); //juntar strings para enviar
             if(errcode >= sizeof(message)) return -1;
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
             if(errcode != 0) return -1;
 
-            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, IP, TCP, line, regIP, regUDP);
+            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, IP, TCP, regIP, regUDP);
             else
             {
                 printf("UDP Error.");

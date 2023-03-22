@@ -8,9 +8,19 @@
 
 struct node{
     char *id;
+    
     char *ext;
+    char ipExt[16];
+    char portExt[6];
+
     char *bck;
-    char intr[100][2];
+    char ipBck[16];
+    char portBck[6];
+
+    char intr[100][3];
+    char ipIntr[100][16];
+    char portIntr[100][6];
+    
     char *content[32]; //max de 32 conteudos
     int ncontents;
 };
