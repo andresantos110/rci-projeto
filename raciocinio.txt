@@ -27,3 +27,6 @@ ordem:
 3. tabelas de expedicao, procura de conteudos.
 
 para saber a que fd corresponde cada nó, guarda em intr[fd] o id do nó
+
+que ips guardar sempre? externo e proprio só, ou internos tambem?
+guardar so externo e proprio? quando externo cai, alterar para um dos internos

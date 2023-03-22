@@ -180,10 +180,11 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char infoExt[32], ch
 int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividade no fd de uma ligacao tcp.
 {
     char buffer[1024+1];
+    char message[1024+1];
     char command[16], arg1[32], arg2[32], arg3[32];
 
     //verificar se foi saída
-    if(read(fds, buffer, 129) == 0)
+    if(read(fd, buffer, 129) == 0)
     {
 
     }
@@ -197,13 +198,14 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
             content
             nocontent
         */
-        if(strstr(buffer, "NEW") != NULL)
+        /*if(strstr(buffer, "NEW") != NULL) //se for new
         {
             //arg1 = id; arg2 = IP; arg3 = TCP     
-            //sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-
+            sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
+            strcpy(nodo->intr[atoi(fd)], arg1);
+            snprintf(message, sizeof(message), "%s %s %s", "EXTERN", nodo->ext, )
             //send(fd,)
-        }
+        }*/
     }
 
 }

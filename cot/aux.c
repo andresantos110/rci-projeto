@@ -4,7 +4,7 @@
 void findNode(char buffer[], char line[], int nNodes, char node [])
 {
     strcpy(line, "\0");
-    char *auxString, auxBuffer[128], el1[4], el2[16], el3[6];
+    char *auxString, auxBuffer[1024], el1[4], el2[16], el3[6];
     int i;
 
     strcpy(auxBuffer,buffer);
