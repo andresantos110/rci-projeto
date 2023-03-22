@@ -203,7 +203,12 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
             //arg1 = id; arg2 = IP; arg3 = TCP
             if(strcmp(nodo->ext, "-1") == 0)
             {
-                printf("Todo - primeiro nó quando recebe new");
+                sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
+                strcpy(nodo->ext, arg1);
+                strcpy(nodo->ipExt, arg2);
+                strcpy(nodo->portExt, arg3);
+                snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
+                send(fd, message, strlen(message), 0);
             }
             else //se nao for o primeiro nó
             {
