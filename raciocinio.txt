@@ -13,6 +13,8 @@ withdraw
 3. UM NÓ SAI
 se nao for ancora
 os que tinham o nó que saiu como externo enviam NEW ao seu proprio backup, que responde com extern para atualizar o backup.
+se a ligacao que cai for interno, nao faz nada
+se for externo, bck->ext, enviar new, receber extern.
 
 se for ancora
 o outro nó ancora (que se tem a si mesmo como backup) atualiza o seu vizinho externo para um dos internos (promove a ancora)

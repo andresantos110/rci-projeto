@@ -214,6 +214,8 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
             {
                 sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
                 strcpy(nodo->intr[atoi(fd)], arg1);
+                strcpy(nodo->ipIntr[atoi(fd)], arg2);
+                strcpy(nodo->portIntr[atoi(fd)], arg3);
                 snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
                 send(fd, message, strlen(message), 0);
             }
