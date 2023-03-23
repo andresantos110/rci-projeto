@@ -98,7 +98,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char
         if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo
         {
             FD_CLR(selfClient_fd, &read_fds);
-
+            //chamar commTCP, verificar se correu tudo bem
         }
 
         for (i = 0; i < 100; i++) //atividade num interno
@@ -108,8 +108,16 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char
             if (FD_ISSET(fds, &read_fds))  
             {  
                 FD_CLR(fds, &read_fds);
+                if(commTCP(fds, nodo) == 0)
+                {
+                    close(fds);  
+                    num_clients--;
+                    client_fds[i] = -1; 
+                }
+                else printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
+                //remover else, para teste apenas
 
-                if ((valread = read(fds, buffer, 129)) == 0)  
+                /*if ((valread = read(fds, buffer, 129)) == 0)  
                 {  
                     //saiu
                     getpeername(fds, (struct sockaddr*)&server_addr , \
@@ -128,19 +136,14 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char
 
                     buffer[valread] = '\0';
                     send(fds, buffer , strlen(buffer) , 0 );
-                    /*if(strstr(buffer, "NEW") != NULL)
-                    {
-
-
-                    }*/ 
-                } 
+                }*/
                 //if(num_clients == 0) max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
                 if(num_clients == 0) max_fd = max(server_fd, STDIN_FILENO);
             } 
         } 
 
 
-        if (FD_ISSET(STDIN_FILENO, &read_fds))
+        if (FD_ISSET(STDIN_FILENO, &read_fds)) //input teclado
         {
             fgets(input, sizeof(input), stdin);
 
@@ -167,6 +170,16 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char
                 printf("Enviada: %s\nRecebida: %s\n", message, buffer);
                 if(strcmp(buffer, "OKUNREG") == 0) printf("Unreg successful.");     
             }
+            if(strcmp(command, "st") == 0)
+            {
+                printf("Node %s topology:\nExtern: %s %s %s\nBackup: %s %s %s\nIntern:\n", nodo->id,
+                nodo->ext, nodo->ipExt, nodo->portExt, nodo->bck, nodo->ipBck, nodo->portBck);
+                for(i=0;i<100;i++)
+                {
+                    if(strcmp(nodo->intr[i], "\0") != 0) printf("%s %s %s\n",
+                    nodo->intr[i], nodo->ipIntr[i], nodo->portIntr[i]);
+                }
+            } 
         }
     }
 
@@ -176,17 +189,19 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char
 }
 
 int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividade no fd de uma ligacao tcp.
-{
+{ //meter um return -1 caso haja erros
     char buffer[1024+1];
     char message[1024+1];
     char command[16], arg1[32], arg2[32], arg3[32];
 
     //verificar se foi saída
-    if(read(fd, buffer, 129) == 0)
+    if(read(fd, buffer, 129) == 0) //return 0 caso o nó onde houve atividade tenha saido da rede.
     {
+        //INSERIR ENVIO DE WITHDRAW AQUI
+        //todo: leave
         return 0;
     }
-    else
+    else //caso exista comunicacao, return 1.
     {
         /*verificar o que recebeu
             new
