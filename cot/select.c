@@ -202,7 +202,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
     {
         //INSERIR ENVIO DE WITHDRAW AQUI
         //todo: leave
-        for(i = 0;i < 100;i++)
+        /*for(i = 0;i < 100;i++)
         {
             if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
             {
@@ -216,7 +216,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
         strcpy(nodo->ext, nodo->bck);
         strcpy(nodo->ipExt, nodo->ipBck);
         strcpy(nodo->portExt, nodo->portBck);
-        snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
+        snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);*/
         //falta send para fd do externo
         return 0;
     }
