@@ -10,8 +10,6 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char
     int i, fds;
     int valread;
     char buffer[1024+1], input[128+1], message[128+1];
-    char ipExt[16], tcpExt[6];
-    char auxIP[16], auxTCP[6];
 
     char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
 
@@ -186,7 +184,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
     //verificar se foi saída
     if(read(fd, buffer, 129) == 0)
     {
-
+        return 0;
     }
     else
     {
@@ -213,9 +211,9 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
             else //se nao for o primeiro nó
             {
                 sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-                strcpy(nodo->intr[atoi(fd)], arg1);
-                strcpy(nodo->ipIntr[atoi(fd)], arg2);
-                strcpy(nodo->portIntr[atoi(fd)], arg3);
+                strcpy(nodo->intr[fd], arg1);
+                strcpy(nodo->ipIntr[fd], arg2);
+                strcpy(nodo->portIntr[fd], arg3);
                 snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
                 send(fd, message, strlen(message), 0);
             }
@@ -225,6 +223,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
             sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
             strcpy(nodo->bck, arg1);
         }
+        return 1;
     }
 
 }

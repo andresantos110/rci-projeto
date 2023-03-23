@@ -95,14 +95,15 @@ int main(int argc, char **argv)
             //printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
 
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
+            nNodes--;
             printf("Number of nodes in the network: %d\n", nNodes);
 
             if(nNodes == 0)
             {
-                printf("Todo, primeiro nó");
+                strcpy(nodo->id, arg2);
                 strcpy(nodo->ext, "-1");
-            }
-            
+                strcpy(nodo->bck, arg2);
+            }     
             else
             {
                 findNode(buffer, line, nNodes, arg2);
@@ -143,8 +144,12 @@ int main(int argc, char **argv)
 
             printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
 
+            memset(buffer,0,sizeof(buffer));
+            printf("%s", buffer);
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
             if(errcode != 0) return -1;
+
+            printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
 
             if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, IP, TCP, regIP, regUDP);
             else
