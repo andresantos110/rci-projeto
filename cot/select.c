@@ -116,7 +116,8 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char
                 }
                 else printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
                 //remover else, para teste apenas
-
+                FD_CLR(fds, &read_fds);
+                
                 /*if ((valread = read(fds, buffer, 129)) == 0)  
                 {  
                     //saiu
