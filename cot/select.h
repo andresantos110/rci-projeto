@@ -8,3 +8,5 @@
 #endif
 
 void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char regUDP[6]);
+
+int commTCP(int fd, struct node *nodo);
