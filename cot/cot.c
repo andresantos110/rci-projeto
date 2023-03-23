@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv)
 {
-    char regIP[16], regUDP[6], IP[16], TCP[6];
+    char regIP[16], regUDP[6];
     char buffer[1024+1];
     char message[128+1] = "NODES ";
     char input[128];
@@ -34,8 +34,8 @@ int main(int argc, char **argv)
         strcpy(regUDP, argv[4]);
     }
 
-    strcpy(IP, argv[1]);
-    strcpy(TCP, argv[2]);
+    strcpy(nodo->ip, argv[1]);
+    strcpy(nodo->port, argv[2]);
 
     /*if (word_count == 1){
         command = word_array[0];
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
                 sscanf(line, "%s %s %s", nodo->ext, nodo->ipExt, nodo->portExt);
             }
 
-            errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, IP, TCP); //juntar strings para enviar
+            errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, nodo->ip, nodo->port); //juntar strings para enviar
             if(errcode >= sizeof(message)) return -1;
 
             printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
 
             printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
 
-            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, IP, TCP, regIP, regUDP);
+            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, regIP, regUDP);
             else
             {
                 printf("UDP Error.");
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
             //boottcp o comando EXTERN, informar-se com NEW
 
             nodo->id = arg2;
-            errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, IP, TCP); //juntar strings para enviar
+            errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, nodo->ip, nodo->port); //juntar strings para enviar
         }
 
         if(strcmp(command, "leave") == 0) printf("Not yet on the network.");

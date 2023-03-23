@@ -2,13 +2,13 @@
 #include "select.h"
 #include "udp.h"
 
-void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char regUDP[6])
+void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
 {
     int server_fd, max_fd, selfClient_fd, client_fds[100];
     int num_clients = 0;
     int optval = 1;
     int i, fds;
-    int valread;
+    //int valread;
     char buffer[1024+1], input[128+1], message[128+1];
 
     char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
@@ -24,7 +24,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char
 
     server_addr.sin_family = AF_INET; //IPv4
     server_addr.sin_addr.s_addr = INADDR_ANY; //aceitar de qualquer ip
-    server_addr.sin_port = htons(atoi(TCP)); //port
+    server_addr.sin_port = htons(atoi(nodo->port)); //port
 
     if(strcmp(nodo->ext, "-1") != 0) // verificar se é primeiro nó, entra no if se nao for
     {  
@@ -35,9 +35,10 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char
         external_addr.sin_addr.s_addr = inet_addr(nodo->ipExt); //IP DO EXTERNO
         external_addr.sin_port = htons(atoi(nodo->portExt)); //PORTA DO EXTERNO
         if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
-        snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, IP, TCP);
+        snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
         send(selfClient_fd, message , strlen(message) , 0 ); 
     }
+
 
     if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) exit(1);
 
@@ -117,7 +118,7 @@ void tcpSelect(struct node *nodo, char IP[16], char TCP[6], char regIP[16], char
                 else printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
                 //remover else, para teste apenas
                 FD_CLR(fds, &read_fds);
-                
+
                 /*if ((valread = read(fds, buffer, 129)) == 0)  
                 {  
                     //saiu
@@ -194,12 +195,29 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
     char buffer[1024+1];
     char message[1024+1];
     char command[16], arg1[32], arg2[32], arg3[32];
+    int i = 0;
 
     //verificar se foi saída
     if(read(fd, buffer, 129) == 0) //return 0 caso o nó onde houve atividade tenha saido da rede.
     {
         //INSERIR ENVIO DE WITHDRAW AQUI
         //todo: leave
+        for(i = 0;i < 100;i++)
+        {
+            if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
+            {
+                strcpy(nodo->intr[i], "\0");
+                strcpy(nodo->ipIntr[i], "\0");
+                strcpy(nodo->portIntr[i], "\0"); //limpar informacao do nó que saiu
+                return 0;
+            }
+        }
+        //caso o ciclo for nao encontre nada, saiu um externo.
+        strcpy(nodo->ext, nodo->bck);
+        strcpy(nodo->ipExt, nodo->ipBck);
+        strcpy(nodo->portExt, nodo->portBck);
+        snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
+        //falta send para fd do externo
         return 0;
     }
     else //caso exista comunicacao, return 1.

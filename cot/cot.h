@@ -8,6 +8,8 @@
 
 struct node{
     char *id;
+    char ip[16];
+    char port[6];
     
     char *ext;
     char ipExt[16];
