@@ -99,7 +99,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
         if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo
         {
             FD_CLR(selfClient_fd, &read_fds);
-            commTCP(selfClient_fd, nodo);
+            //commTCP(selfClient_fd, nodo);
             //chamar commTCP, verificar se correu tudo bem
         }
 
