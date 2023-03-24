@@ -57,7 +57,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
 
         FD_SET(server_fd, &read_fds);
         FD_SET(STDIN_FILENO, &read_fds);
-        if(strcmp(nodo->ext, "\0") != 0) FD_SET(selfClient_fd, &read_fds);
+        if(strcmp(nodo->ext, "-1") != 0) FD_SET(selfClient_fd, &read_fds);
 
         for ( i = 0 ; i < 100 ; i++)  
         {  
@@ -99,7 +99,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
         if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo
         {
             FD_CLR(selfClient_fd, &read_fds);
-            //commTCP(selfClient_fd, nodo);
+            commTCP(selfClient_fd, nodo); //está a dar merda aqui
             //chamar commTCP, verificar se correu tudo bem
         }
 
@@ -203,6 +203,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
 
 }
 
+
 int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividade no fd de uma ligacao tcp.
 { //meter um return -1 caso haja erros
     char buffer[1024+1];
@@ -211,10 +212,12 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
     int i = 0;
 
     //verificar se foi saída
-    if(read(fd, buffer, 129) == 0) //return 0 caso o nó onde houve atividade tenha saido da rede.
+    if(read(fd, buffer, 1024) == 0) //return 0 caso o nó onde houve atividade tenha saido da rede.
     {
+
+        return 0;
         //INSERIR ENVIO DE WITHDRAW AQUI
-        for(i = 0;i < 100;i++)
+        /*for(i = 0;i < 100;i++)
         {
             if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
             {
@@ -258,7 +261,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
             snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
             //send(fd, message, strlen(buffer), 0);
         }
-        return 0;
+        return 0;*/
     }
     else //caso exista comunicacao, return 1.
     {
