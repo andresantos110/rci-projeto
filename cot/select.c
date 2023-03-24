@@ -108,7 +108,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                  
             if (FD_ISSET(fds, &read_fds))  
             {  
-                FD_CLR(fds, &read_fds);
                 if(commTCP(fds, nodo) == 0)
                 {
                     close(fds);  
@@ -166,11 +165,20 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
             if(strcmp(command, "djoin") == 0) printf("Error: Already joined.\n");
             if(strcmp(command, "leave") == 0)
             {
-                arg1 = word_array[1];
-                if(snprintf(message, sizeof(message), "%s %s %s", "UNREG", arg1, nodo->id) !=0) exit(1);
+                memset(message,0,sizeof(message));
+                memset(buffer,0,sizeof(buffer));
+                if(snprintf(message, sizeof(message), "%s %s %s", "UNREG", "105", "02") !=0) exit(1); //erro neste snprintf
                 if(commUDP(message, buffer, regIP, regUDP) != 0) exit(1);
                 printf("Enviada: %s\nRecebida: %s\n", message, buffer);
-                if(strcmp(buffer, "OKUNREG") == 0) printf("Unreg successful.");     
+                if(strcmp(buffer, "OKUNREG") == 0) printf("Unreg successful - leaving network...");   
+                FD_ZERO(&read_fds);
+                close(server_fd);
+                close(selfClient_fd);
+                for(i = 0; i < 100; i++)
+                {
+                    fds = client_fds[i];
+                    close(fds);
+                }  
             }
             if(strcmp(command, "st") == 0)
             {
@@ -201,7 +209,6 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
     if(read(fd, buffer, 129) == 0) //return 0 caso o nó onde houve atividade tenha saido da rede.
     {
         //INSERIR ENVIO DE WITHDRAW AQUI
-        //todo: leave
         for(i = 0;i < 100;i++)
         {
             if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
@@ -212,12 +219,40 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
                 return 0;
             }
         }
-        //caso o ciclo for nao encontre nada, saiu um externo.
-        strcpy(nodo->ext, nodo->bck);
-        strcpy(nodo->ipExt, nodo->ipBck);
-        strcpy(nodo->portExt, nodo->portBck);
-        snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
-        send(fd, message, strlen(buffer), 0);
+
+	//caso saia o outro nó ancora, tem de promover um interno a externo
+	    if(nodo->bck == nodo->id)
+        {
+            for(i = 0;i < 100;i++)
+            {
+                if(strcmp(nodo->intr[i], "\0") != 0) //saiu um interno
+                {
+                    strcpy(nodo->ext, nodo->intr[i]);
+                    strcpy(nodo->ipExt, nodo->ipIntr[i]);
+                    strcpy(nodo->portExt, nodo->portIntr[i]); //promover primeiro interno que encontrar a externo
+                    break;
+                }
+            }
+            if(i != 100)
+            {
+                snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
+                send(fd, message, strlen(message), 0);
+            }
+            else
+            {
+                strcpy(nodo->ext, "-1");
+                strcpy(nodo->ipExt, "\0");
+                strcpy(nodo->portExt, "\0"); //nao tem internos, ficou sozinho na rede
+            }
+        }
+        else
+        {
+            strcpy(nodo->ext, nodo->bck);
+            strcpy(nodo->ipExt, nodo->ipBck);
+            strcpy(nodo->portExt, nodo->portBck);
+            snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
+            send(fd, message, strlen(buffer), 0);
+        }
         return 0;
     }
     else //caso exista comunicacao, return 1.
@@ -256,6 +291,8 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
         {
             sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
             strcpy(nodo->bck, arg1);
+            strcpy(nodo->ipBck, arg2);
+            strcpy(nodo->portBck, arg3);
         }
         return 1;
     }

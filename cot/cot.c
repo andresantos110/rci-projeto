@@ -138,7 +138,7 @@ int main(int argc, char **argv)
                 }
                 sscanf(line, "%s %s %s", nodo->ext, nodo->ipExt, nodo->portExt);
             }
-
+            memset(message,0,sizeof(message));
             errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, nodo->ip, nodo->port); //juntar strings para enviar
             if(errcode >= sizeof(message)) return -1;
 
