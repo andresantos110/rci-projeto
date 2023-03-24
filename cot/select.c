@@ -8,7 +8,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
     int num_clients = 0;
     int optval = 1;
     int i, fds;
-    int valread;
+    //int valread;
     char buffer[1024+1], input[128+1], message[128+1];
 
     char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
@@ -99,6 +99,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
         if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo
         {
             FD_CLR(selfClient_fd, &read_fds);
+            commTCP(selfClient_fd, nodo);
             //chamar commTCP, verificar se correu tudo bem
         }
 
@@ -130,7 +131,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                     //fechar socket 
                     close(fds);  
                     num_clients--;
-                    client_fds[i] = -1;  */
+                    client_fds[i] = -1;
                 }
                 //Comunicação entre nós
                 else 
@@ -193,7 +194,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                     if(strcmp(nodo->intr[i], "\0") != 0) printf("%s %s %s\n",
                     nodo->intr[i], nodo->ipIntr[i], nodo->portIntr[i]);
                 }
-            } 
+            }
         }
     }
 
@@ -212,7 +213,6 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
     //verificar se foi saída
     if(read(fd, buffer, 129) == 0) //return 0 caso o nó onde houve atividade tenha saido da rede.
     {
-        printf("bazou lole");
         //INSERIR ENVIO DE WITHDRAW AQUI
         for(i = 0;i < 100;i++)
         {
@@ -241,7 +241,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
             if(i != 100)
             {
                 snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
-                send(fd, message, strlen(message), 0);
+                //send(fd, message, strlen(message), 0);
             }
             else
             {
@@ -256,7 +256,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
             strcpy(nodo->ipExt, nodo->ipBck);
             strcpy(nodo->portExt, nodo->portBck);
             snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
-            send(fd, message, strlen(buffer), 0);
+            //send(fd, message, strlen(buffer), 0);
         }
         return 0;
     }

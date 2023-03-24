@@ -103,6 +103,8 @@ int main(int argc, char **argv)
                 strcpy(nodo->id, arg2);
                 strcpy(nodo->ext, "-1");
                 strcpy(nodo->bck, arg2);
+                strcpy(nodo->ipExt, "/0");
+                strcpy(nodo->portExt, "/0");
             }     
             else
             {
@@ -122,6 +124,8 @@ int main(int argc, char **argv)
                 else strcpy(nodo->id, arg2);
 
                 strcpy(nodo->bck, nodo->id);
+                strcpy(nodo->ipBck, nodo->ip);
+                strcpy(nodo->portBck, nodo->port);
 
                 while(strlen(input) != 3)
                 {
