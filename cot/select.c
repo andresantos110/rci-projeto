@@ -8,7 +8,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
     int num_clients = 0;
     int optval = 1;
     int i, fds;
-    //int valread;
+    int valread;
     char buffer[1024+1], input[128+1], message[128+1];
 
     char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
@@ -108,7 +108,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                  
             if (FD_ISSET(fds, &read_fds))  
             {  
-                if(commTCP(fds, nodo) == 0)
+                if(commTCP(fds, nodo) == 0) // o read = 0 da merda?
                 {
                     close(fds);  
                     num_clients--;
@@ -118,19 +118,20 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                 //remover else, para teste apenas
                 FD_CLR(fds, &read_fds);
 
-                /*if ((valread = read(fds, buffer, 129)) == 0)  
+                /*if ((valread = read(fds, buffer, 1024)) == 0)  
                 {  
+                    printf("ha merda ");
                     //saiu
                     getpeername(fds, (struct sockaddr*)&server_addr , \
                         (socklen_t*)sizeof(server_addr));  
                     printf("Host disconnected , ip %s , port %d \n" , 
-                          inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));  
+                          inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));
                          
                     //fechar socket 
                     close(fds);  
                     num_clients--;
-                    client_fds[i] = -1;  
-                }               
+                    client_fds[i] = -1;  */
+                }
                 //Comunicação entre nós
                 else 
                 {  
@@ -167,11 +168,12 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
             {
                 memset(message,0,sizeof(message));
                 memset(buffer,0,sizeof(buffer));
-                printf("%d", snprintf(message, sizeof(message), "%s %s %s", "UNREG", "105", nodo->id)); 
+                snprintf(message, sizeof(message), "%s %s %s", "UNREG", "820", nodo->id);
+                if(strncmp(message, "UNREG", 5) != 0) printf("Erro");
                 //if(snprintf(message, sizeof(message), "%s %s %s", "UNREG", "105", nodo->id) !=0) exit(1); //erro neste snprintf
                 if(commUDP(message, buffer, regIP, regUDP) != 0) exit(1);
                 printf("Enviada: %s\nRecebida: %s\n", message, buffer);
-                if(strcmp(buffer, "OKUNREG") == 0) printf("Unreg successful - leaving network...");   
+                if(strcmp(buffer, "OKUNREG") == 0) printf("Unreg successful - leaving network...\n");   
                 FD_ZERO(&read_fds);
                 close(server_fd);
                 close(selfClient_fd);
@@ -180,6 +182,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                     fds = client_fds[i];
                     close(fds);
                 }  
+                return;
             }
             if(strcmp(command, "st") == 0)
             {
@@ -209,6 +212,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
     //verificar se foi saída
     if(read(fd, buffer, 129) == 0) //return 0 caso o nó onde houve atividade tenha saido da rede.
     {
+        printf("bazou lole");
         //INSERIR ENVIO DE WITHDRAW AQUI
         for(i = 0;i < 100;i++)
         {
