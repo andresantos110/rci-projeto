@@ -179,11 +179,11 @@ int main(int argc, char **argv)
             errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, nodo->ip, nodo->port); //juntar strings para enviar
         }
 
-        if(strcmp(command, "leave") == 0) printf("Not yet on the network.");
-        if(strcmp(command, "st") == 0) printf("Not yet on the network.");
-        if(strcmp(command, "sr") == 0) printf("Not yet on the network.");
-        if(strcmp(command, "get") == 0) printf("Not yet on the network.");
-        if(strcmp(command, "exit") == 0)
+        if(strcmp(command, "leave") == 0) printf("Not yet on the network.\n");
+        else if(strcmp(command, "st") == 0) printf("Not yet on the network.\n");
+        else if(strcmp(command, "sr") == 0) printf("Not yet on the network.\n");
+        else if(strcmp(command, "get") == 0) printf("Not yet on the network.\n");
+        else if(strcmp(command, "exit") == 0)
         {
             free(nodo->id);
             free(nodo->ext);
@@ -192,7 +192,7 @@ int main(int argc, char **argv)
             return 0;
             //free memoria conteudos?
         }
-        if(strcmp(command, "create") == 0)
+        else if(strcmp(command, "create") == 0)
         {
             if(word_count == 1) printf("Content name not found.\n");
             else
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
                 nodo->ncontents++;
             }
         }
-        if(strcmp(command, "delete") == 0)
+        else if(strcmp(command, "delete") == 0)
         {
             arg1 = word_array[1];
             errcode = nodo->ncontents;
@@ -226,7 +226,7 @@ int main(int argc, char **argv)
             if(errcode == nodo->ncontents) printf("Content not found.\n");
 
         }
-        if(strcmp(command, "sn") == 0)
+        else if(strcmp(command, "sn") == 0)
         {
             if(nodo->ncontents == 0) printf("No contents in node.\n");
             else
@@ -238,6 +238,7 @@ int main(int argc, char **argv)
                 }
             }
         }
+        else printf("Command not recognized.\n");
     }
 
     //elsifs para comando nao reconhecido?

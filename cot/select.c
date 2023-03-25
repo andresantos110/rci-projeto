@@ -177,7 +177,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
             {
                 memset(message,0,sizeof(message));
                 memset(buffer,0,sizeof(buffer));
-                snprintf(message, sizeof(message), "%s %s %s", "UNREG", "820", nodo->id);
+                snprintf(message, sizeof(message), "%s %s %s", "UNREG", "105", nodo->id);
                 if(strncmp(message, "UNREG", 5) != 0) printf("Erro");
                 //if(snprintf(message, sizeof(message), "%s %s %s", "UNREG", "105", nodo->id) !=0) exit(1); //erro neste snprintf
                 if(commUDP(message, buffer, regIP, regUDP) != 0) exit(1);
