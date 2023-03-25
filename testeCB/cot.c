@@ -23,10 +23,10 @@ int main(int argc, char **argv)
 
 
     if(argc != 5 && argc != 3) exit(1); //inicializacao dos valores dados como argumento
-    if(argc == 3)
+    if(argc == 3) 
     {
        strcpy (regIP, "193.136.138.142");
-       strcpy (regUDP, "59000");
+       strcpy (regUDP, "59000"); 
     }
     if(argc == 5)
     {
@@ -56,15 +56,16 @@ int main(int argc, char **argv)
         arg5 = word_array[5];
     }*/
 
+    //ADICIONAR WHILE PARA NAO SAIR DO PROGRAMA DEPOIS DE 1 COMANDO
     while(1)
     {
 
         printf("Enter a command: \n");
         fgets(input, sizeof(input), stdin);
 
-        input[strcspn(input, "\n")] = 0;
+        input[strcspn(input, "\n")] = 0; 
 
-        char *word_array[6];
+        char *word_array[6]; 
         int word_count = 0;
 
         char *token = strtok(input, " ");
@@ -100,11 +101,11 @@ int main(int argc, char **argv)
             if(nNodes == 0)
             {
                 strcpy(nodo->id, arg2);
-                strcpy(nodo->ext, "-1");
+                strcpy(nodo->ext, arg2);
                 strcpy(nodo->bck, arg2);
                 strcpy(nodo->ipExt, "\0");
                 strcpy(nodo->portExt, "\0");
-            }
+            }     
             else
             {
                 findNode(buffer, line, nNodes, arg2);
@@ -122,10 +123,6 @@ int main(int argc, char **argv)
                 }
                 else strcpy(nodo->id, arg2);
 
-                strcpy(nodo->bck, nodo->id);
-                strcpy(nodo->ipBck, nodo->ip);
-                strcpy(nodo->portBck, nodo->port);
-
                 while(strlen(input) != 3)
                 {
                     printf("Select the node to connect to:\n");
@@ -141,6 +138,11 @@ int main(int argc, char **argv)
                 }
                 sscanf(line, "%s %s %s", nodo->ext, nodo->ipExt, nodo->portExt);
             }
+
+            strcpy(nodo->bck, nodo->id);
+            strcpy(nodo->ipBck, nodo->ip);
+            strcpy(nodo->portBck, nodo->port);
+
             memset(message,0,sizeof(message));
             errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, nodo->ip, nodo->port); //juntar strings para enviar
             if(errcode >= sizeof(message)) return -1;
@@ -224,7 +226,7 @@ int main(int argc, char **argv)
             if(errcode == nodo->ncontents) printf("Content not found.\n");
 
         }
-            if(strcmp(command, "sn") == 0)
+        if(strcmp(command, "sn") == 0)
         {
             if(nodo->ncontents == 0) printf("No contents in node.\n");
             else

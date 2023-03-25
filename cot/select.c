@@ -8,7 +8,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
     int num_clients = 0;
     int optval = 1;
     int i, fds;
-    int fn; //indicador primeiro nó
+    int fn = 0; //indicador primeiro nó
     int errcode;
     char buffer[1024+1], input[128+1], message[128+1];
 
@@ -42,7 +42,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
     }
     else fn = 1;
 
-
     if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) exit(1);
 
     for (int i = 0; i < 100; i++) client_fds[i] = -1;
@@ -57,10 +56,9 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
 
     while(1)
     {
-
+        FD_SET(selfClient_fd, &read_fds);
         FD_SET(server_fd, &read_fds);
         FD_SET(STDIN_FILENO, &read_fds);
-        if(fn == 0) FD_SET(selfClient_fd, &read_fds);
 
         for ( i = 0 ; i < 100 ; i++)  
         {  
@@ -100,10 +98,10 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
         }
         if(fn == 0)
         {
-            if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo
+            if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo - nao esta a entrar?
             {
-                FD_CLR(selfClient_fd, &read_fds);
                 commTCP(selfClient_fd, nodo);
+                FD_CLR(selfClient_fd, &read_fds);
             }
         }
 
@@ -355,6 +353,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
         }
         if(strstr(buffer, "EXTERN") != NULL) //se for null
         {
+            printf("%s", buffer);
             sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
             strcpy(nodo->bck, arg1);
             strcpy(nodo->ipBck, arg2);

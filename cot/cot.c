@@ -226,7 +226,7 @@ int main(int argc, char **argv)
             if(errcode == nodo->ncontents) printf("Content not found.\n");
 
         }
-            if(strcmp(command, "sn") == 0)
+        if(strcmp(command, "sn") == 0)
         {
             if(nodo->ncontents == 0) printf("No contents in node.\n");
             else
