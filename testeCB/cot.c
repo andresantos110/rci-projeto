@@ -20,13 +20,20 @@ int main(int argc, char **argv)
     nodo->bck = calloc(2, sizeof(char));
     nodo->ncontents = 0;
 
+    for(i=0;i<100;i++)
+    {
+        strcpy(nodo->intr, "\0");
+    }
+    strcpy(nodo->ext, "\0");
+    strcpy(nodo->ipExt, "\0");
+    strcpy(nodo->portExt, "\0");
 
 
     if(argc != 5 && argc != 3) exit(1); //inicializacao dos valores dados como argumento
-    if(argc == 3) 
+    if(argc == 3)
     {
        strcpy (regIP, "193.136.138.142");
-       strcpy (regUDP, "59000"); 
+       strcpy (regUDP, "59000");
     }
     if(argc == 5)
     {
@@ -63,9 +70,9 @@ int main(int argc, char **argv)
         printf("Enter a command: \n");
         fgets(input, sizeof(input), stdin);
 
-        input[strcspn(input, "\n")] = 0; 
+        input[strcspn(input, "\n")] = 0;
 
-        char *word_array[6]; 
+        char *word_array[6];
         int word_count = 0;
 
         char *token = strtok(input, " ");
@@ -102,10 +109,9 @@ int main(int argc, char **argv)
             {
                 strcpy(nodo->id, arg2);
                 strcpy(nodo->ext, arg2);
-                strcpy(nodo->bck, arg2);
                 strcpy(nodo->ipExt, "\0");
                 strcpy(nodo->portExt, "\0");
-            }     
+            }
             else
             {
                 findNode(buffer, line, nNodes, arg2);
