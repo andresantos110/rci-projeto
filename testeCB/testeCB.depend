@@ -1,0 +1,39 @@
+# depslib dependency file v1.0
+1679478321 source:/home/andre/Documents/testeCB/aux.c
+	"cot.h"
+
+1679677795 /home/andre/Documents/testeCB/cot.h
+	<stdio.h>
+	<stdlib.h>
+	<sys/types.h>
+	<sys/socket.h>
+	<netdb.h>
+	<string.h>
+	<unistd.h>
+
+1679754560 source:/home/andre/Documents/testeCB/select.c
+	"cot.h"
+	"select.h"
+	"udp.h"
+
+1679677802 /home/andre/Documents/testeCB/select.h
+	<errno.h>
+	<netinet/in.h>
+	<sys/time.h>
+	<arpa/inet.h>
+
+1679677790 /home/andre/Documents/testeCB/udp.h
+	<arpa/inet.h>
+
+1679677790 source:/home/andre/Documents/testeCB/udp.c
+	"cot.h"
+	"udp.h"
+
+1679680514 source:/home/andre/Documents/testeCB/cot.c
+	"cot.h"
+	"udp.h"
+	"select.h"
+	"aux.h"
+
+1679250375 /home/andre/Documents/testeCB/aux.h
+
