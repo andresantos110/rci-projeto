@@ -332,9 +332,6 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
             strcpy(nodo->ipExt, nodo->ipBck);
             strcpy(nodo->portExt, nodo->portBck);
             return 1;
-            //snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
-            //send(fd, message, strlen(buffer), 0);
-            //trocar por return, enviar para externo mensagem
         }
         return -1;
     }
