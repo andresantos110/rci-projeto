@@ -1,6 +1,7 @@
 #include "cot.h"
 #include "select.h"
 #include "udp.h"
+#include "aux.h"
 
 void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
 {
@@ -56,7 +57,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
 
     //max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
 
-    max_fd = max(server_fd, STDIN_FILENO);
+    max_fd = max3(server_fd, STDIN_FILENO, selfClient_fd);
+    //max_fd = max(server_fd, STDIN_FILENO);
 
     while(1)
     {
@@ -64,7 +66,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
         FD_SET(server_fd, &read_fds);
         FD_SET(STDIN_FILENO, &read_fds);
 
-        for ( i = 0 ; i < 100 ; i++)
+        for (i = 0 ; i < 100 ; i++)
         {
             fds = client_fds[i];
 
