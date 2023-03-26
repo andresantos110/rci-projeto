@@ -20,20 +20,13 @@ int main(int argc, char **argv)
     nodo->bck = calloc(2, sizeof(char));
     nodo->ncontents = 0;
 
-    for(i=0;i<100;i++)
-    {
-        strcpy(nodo->intr, "\0");
-    }
-    strcpy(nodo->ext, "\0");
-    strcpy(nodo->ipExt, "\0");
-    strcpy(nodo->portExt, "\0");
 
 
     if(argc != 5 && argc != 3) exit(1); //inicializacao dos valores dados como argumento
-    if(argc == 3)
+    if(argc == 3) 
     {
        strcpy (regIP, "193.136.138.142");
-       strcpy (regUDP, "59000");
+       strcpy (regUDP, "59000"); 
     }
     if(argc == 5)
     {
@@ -70,9 +63,9 @@ int main(int argc, char **argv)
         printf("Enter a command: \n");
         fgets(input, sizeof(input), stdin);
 
-        input[strcspn(input, "\n")] = 0;
+        input[strcspn(input, "\n")] = 0; 
 
-        char *word_array[6];
+        char *word_array[6]; 
         int word_count = 0;
 
         char *token = strtok(input, " ");
@@ -109,9 +102,10 @@ int main(int argc, char **argv)
             {
                 strcpy(nodo->id, arg2);
                 strcpy(nodo->ext, arg2);
+                strcpy(nodo->bck, arg2);
                 strcpy(nodo->ipExt, "\0");
                 strcpy(nodo->portExt, "\0");
-            }
+            }     
             else
             {
                 findNode(buffer, line, nNodes, arg2);
@@ -172,24 +166,35 @@ int main(int argc, char **argv)
 
         if(strcmp(command, "djoin") == 0) //arg1 = net; arg2 = id; arg3 = bootid; arg4 = bootIP; arg5=bootTCP
         {
+            if(word_count != 6)
+            {
+                printf("Arguments missing. Exiting.\n");
+                exit(1);
+            }
+
             arg1 = word_array[1];
             arg2 = word_array[2];
             arg3 = word_array[3];
             arg4 = word_array[4];
             arg5 = word_array[5];
 
-            //necessário preencher estrutura do nodo, abrir servidor TCP e perguntar ao nó dado por bootip e
-            //boottcp o comando EXTERN, informar-se com NEW
+            strcpy(nodo->id, arg2);
+            strcpy(nodo->ext, arg3);
+            strcpy(nodo->ipExt, arg4);
+            strcpy(nodo->portExt, arg5);
 
-            nodo->id = arg2;
-            errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, nodo->ip, nodo->port); //juntar strings para enviar
+            strcpy(nodo->bck, arg2);
+            strcpy(nodo->ipBck, nodo->ip);
+            strcpy(nodo->portBck, nodo->port);
+
+            tcpSelect(nodo, regIP, regUDP);
         }
 
-        if(strcmp(command, "leave") == 0) printf("Not yet on the network.");
-        if(strcmp(command, "st") == 0) printf("Not yet on the network.");
-        if(strcmp(command, "sr") == 0) printf("Not yet on the network.");
-        if(strcmp(command, "get") == 0) printf("Not yet on the network.");
-        if(strcmp(command, "exit") == 0)
+        if(strcmp(command, "leave") == 0) printf("Not yet on the network.\n");
+        else if(strcmp(command, "st") == 0) printf("Not yet on the network.\n");
+        else if(strcmp(command, "sr") == 0) printf("Not yet on the network.\n");
+        else if(strcmp(command, "get") == 0) printf("Not yet on the network.\n");
+        else if(strcmp(command, "exit") == 0)
         {
             free(nodo->id);
             free(nodo->ext);
@@ -198,7 +203,7 @@ int main(int argc, char **argv)
             return 0;
             //free memoria conteudos?
         }
-        if(strcmp(command, "create") == 0)
+        else if(strcmp(command, "create") == 0)
         {
             if(word_count == 1) printf("Content name not found.\n");
             else
@@ -210,7 +215,7 @@ int main(int argc, char **argv)
                 nodo->ncontents++;
             }
         }
-        if(strcmp(command, "delete") == 0)
+        else if(strcmp(command, "delete") == 0)
         {
             arg1 = word_array[1];
             errcode = nodo->ncontents;
@@ -232,7 +237,7 @@ int main(int argc, char **argv)
             if(errcode == nodo->ncontents) printf("Content not found.\n");
 
         }
-        if(strcmp(command, "sn") == 0)
+        else if(strcmp(command, "sn") == 0)
         {
             if(nodo->ncontents == 0) printf("No contents in node.\n");
             else
@@ -244,6 +249,7 @@ int main(int argc, char **argv)
                 }
             }
         }
+        else printf("Command not recognized.\n");
     }
 
     //elsifs para comando nao reconhecido?

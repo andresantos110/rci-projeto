@@ -32,3 +32,5 @@ para saber a que fd corresponde cada nó, guarda em intr[fd] o id do nó
 
 file descriptor de cliente nao entra??
 o que acontece no timeout?
+
+ports errados?
