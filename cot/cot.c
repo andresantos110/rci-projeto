@@ -166,17 +166,28 @@ int main(int argc, char **argv)
 
         if(strcmp(command, "djoin") == 0) //arg1 = net; arg2 = id; arg3 = bootid; arg4 = bootIP; arg5=bootTCP
         {
+            if(word_count != 6)
+            {
+                printf("Arguments missing. Exiting.\n");
+                exit(1);
+            }
+
             arg1 = word_array[1];
             arg2 = word_array[2];
             arg3 = word_array[3];
             arg4 = word_array[4];
             arg5 = word_array[5];
 
-            //necessário preencher estrutura do nodo, abrir servidor TCP e perguntar ao nó dado por bootip e
-            //boottcp o comando EXTERN, informar-se com NEW
+            strcpy(nodo->id, arg2);
+            strcpy(nodo->ext, arg3);
+            strcpy(nodo->ipExt, arg4);
+            strcpy(nodo->portExt, arg5);
 
-            nodo->id = arg2;
-            errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, nodo->ip, nodo->port); //juntar strings para enviar
+            strcpy(nodo->bck, arg2);
+            strcpy(nodo->ipBck, nodo->ip);
+            strcpy(nodo->portBck, nodo->port);
+
+            tcpSelect(nodo, regIP, regUDP);
         }
 
         if(strcmp(command, "leave") == 0) printf("Not yet on the network.\n");

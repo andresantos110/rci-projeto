@@ -125,27 +125,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                 //remover else, para teste apenas
                 FD_CLR(fds, &read_fds);
 
-                /*if ((errcode = read(fds, buffer, 1024)) == 0)
-                {
-                    printf("ha merda ");
-                    //saiu
-                    getpeername(fds, (struct sockaddr*)&server_addr , \
-                        (socklen_t*)sizeof(server_addr));
-                    printf("Host disconnected , ip %s , port %d \n" ,
-                          inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));
-
-                    //fechar socket
-                    close(fds);
-                    num_clients--;
-                    client_fds[i] = -1;
-                }
-                //Comunicação entre nós
-                else
-                {
-
-                    buffer[errcode] = '\0';
-                    send(fds, buffer , strlen(buffer) , 0 );
-                }*/
                 //if(num_clients == 0) max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
                 if(num_clients == 0) max_fd = max(server_fd, STDIN_FILENO);
             }
@@ -196,7 +175,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
 
             if(strcmp(command, "st") == 0)
             {
-                printf("Problema: %s\n", nodo->portExt);
                 printf("Node %s topology:\nExtern: %s %s %s\nBackup: %s %s %s\nIntern:\n", nodo->id,
                 nodo->ext, nodo->ipExt, nodo->portExt, nodo->bck, nodo->ipBck, nodo->portBck);
                 for(i=0;i<100;i++)
