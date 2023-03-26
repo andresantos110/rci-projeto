@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     nodo->bck = calloc(2, sizeof(char));
     nodo->ncontents = 0;
 
-
+    srand(time(0));
 
     if(argc != 5 && argc != 3) exit(1); //inicializacao dos valores dados como argumento
     if(argc == 3) 
@@ -97,6 +97,7 @@ int main(int argc, char **argv)
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
             nNodes--;
             printf("Number of nodes in the network: %d\n", nNodes);
+            printf("These nodes are:\n%s", buffer);
 
             if(nNodes == 0)
             {
@@ -112,7 +113,7 @@ int main(int argc, char **argv)
 
                 if(strcmp(line, "\0") != 0)
                 {
-                    sprintf(nodo->id, "%d", atoi(arg2)+1);
+                    sprintf(nodo->id, "%d", rand()%100+1);
                     if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
                     {
                         strcpy(arg2, "0");

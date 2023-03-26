@@ -24,13 +24,13 @@ implementar tabelas de expedicao
 !só necessario para conteudos!
 
 ordem:
-1. new, extern, processamento destes
-2. saida de nó
+1. new, extern, processamento destes DONE
+2. saida de nó DONE
 3. tabelas de expedicao, procura de conteudos.
 
 para saber a que fd corresponde cada nó, guarda em intr[fd] o id do nó
 
-file descriptor de cliente nao entra??
+
 o que acontece no timeout?
 
 ports errados?

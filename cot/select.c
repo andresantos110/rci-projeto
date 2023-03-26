@@ -313,6 +313,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
     {
 
         //INSERIR ENVIO DE WITHDRAW AQUI
+        
         for(i = 0;i < 100;i++) //verificar se saiu interno
         {
             if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
