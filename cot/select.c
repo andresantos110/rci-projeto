@@ -3,7 +3,7 @@
 #include "udp.h"
 #include "aux.h"
 
-void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
+void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 {
     int server_fd, max_fd, selfClient_fd, client_fds[100];
     int num_clients = 0;
@@ -106,8 +106,11 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
         {
             if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo - nao esta a entrar?
             {
-                if(commTCP(selfClient_fd, nodo) == 1) //externo saiu, enviar a novo externo NEW
+                if(commTCP(selfClient_fd, nodo, regIP, regUDP, net) == 1) //externo saiu, enviar a novo externo NEW
                 {
+                    strcpy(nodo->ext, nodo->bck);
+                    strcpy(nodo->ipExt, nodo->ipBck);
+                    strcpy(nodo->portExt, nodo->portBck);
                     close(selfClient_fd);
                     external_addr.sin_addr.s_addr = inet_addr(nodo->ipExt); //IP DO EXTERNO
                     external_addr.sin_port = htons(atoi(nodo->portExt)); //PORTA DO EXTERNO
@@ -128,7 +131,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
 
             if (FD_ISSET(fds, &read_fds))
             {
-                errcode = commTCP(fds, nodo);
+                errcode = commTCP(fds, nodo, regIP, regUDP, net);
                 if(errcode == 0) // saida de interno
                 {
                     close(fds);
@@ -194,13 +197,13 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
 
             if(strcmp(command, "join") == 0) printf("Error: Already joined.\n");
 
-            if(strcmp(command, "djoin") == 0) printf("Error: Already joined.\n");
+            else if(strcmp(command, "djoin") == 0) printf("Error: Already joined.\n");
 
-            if(strcmp(command, "leave") == 0)
+            else if(strcmp(command, "leave") == 0)
             {
                 memset(message,0,sizeof(message));
                 memset(buffer,0,sizeof(buffer));
-                snprintf(message, sizeof(message), "%s %s %s", "UNREG", "105", nodo->id);
+                snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->id);
                 if(strncmp(message, "UNREG", 5) != 0) printf("Erro");
                 //if(snprintf(message, sizeof(message), "%s %s %s", "UNREG", "105", nodo->id) !=0) exit(1); //erro neste snprintf
                 if(commUDP(message, buffer, regIP, regUDP) != 0) exit(1);
@@ -217,7 +220,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                 return;
             }
 
-            if(strcmp(command, "st") == 0)
+            else if(strcmp(command, "st") == 0)
             {
                 printf("Node %s topology:\nExtern: %s %s %s\nBackup: %s %s %s\nIntern:\n", nodo->id,
                 nodo->ext, nodo->ipExt, nodo->portExt, nodo->bck, nodo->ipBck, nodo->portBck);
@@ -228,7 +231,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                 }
             }
 
-            if(strcmp(command, "create") == 0)
+            else if(strcmp(command, "create") == 0)
             {
                 if(word_count == 1) printf("Content name not found.\n");
                 else
@@ -240,7 +243,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                     nodo->ncontents++;
                 }
             }
-            if(strcmp(command, "delete") == 0)
+            else if(strcmp(command, "delete") == 0)
             {
                 arg1 = word_array[1];
                 errcode = nodo->ncontents;
@@ -262,7 +265,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                 if(errcode == nodo->ncontents) printf("Content not found.\n");
 
             }
-            if(strcmp(command, "sn") == 0)
+            else if(strcmp(command, "sn") == 0)
             {
                 if(nodo->ncontents == 0) printf("No contents in node.\n");
                 else
@@ -274,6 +277,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
                     }
                 }
             }
+            else printf("Command not recognized.\n");
 
 
 
@@ -287,13 +291,14 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6])
 }
 
 
-int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividade no fd de uma ligacao tcp.
+int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net) //funcao a ser chamada quando ha atividade no fd de uma ligacao tcp.
 {
     //RETURN -1 ERRO
     //RETURN 0 Saida de interno
     //RETURN 1 Saida de externo
     //RETURN 2 Comunicacao normal
     char buffer[1024+1];
+    char auxBuffer[1024+1];
     char message[1024+1];
     char command[16], arg1[32], arg2[32], arg3[32];
     int i = 0;
@@ -302,6 +307,7 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
     //else return 1;
 
     memset(buffer, 0, sizeof(buffer));
+    memset(auxBuffer, 0, sizeof(auxBuffer));
     memset(message, 0, sizeof(message));
     memset(command, 0, sizeof(command));
     memset(arg1, 0, sizeof(arg1));
@@ -313,11 +319,17 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
     {
 
         //INSERIR ENVIO DE WITHDRAW AQUI
-        
+
         for(i = 0;i < 100;i++) //verificar se saiu interno
         {
             if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
             {
+                memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
+                snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->intr[i]);
+                commUDP(message, auxBuffer, regIP, regUDP);
+                if(strcmp(auxBuffer, "\0") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->intr[i]);
+
+
                 strcpy(nodo->intr[i], "\0");
                 strcpy(nodo->ipIntr[i], "\0");
                 strcpy(nodo->portIntr[i], "\0"); //limpar informacao do nó que saiu
@@ -327,10 +339,18 @@ int commTCP(int fd, struct node *nodo) //funcao a ser chamada quando ha atividad
 
 	    if(strcmp(nodo->bck, nodo->id) == 0) //verificar se é ancora - sabe-se que nao saiu interno logo saiu a outra ancora(ext)
         {
+            memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
+            snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->ext);
+            commUDP(message, auxBuffer, regIP, regUDP);
+            if(strcmp(auxBuffer, "\0") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->ext);
             return 1;
         }
         else //se nao for ancora, apenas saiu um externo
         {
+            memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
+            snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->ext);
+            commUDP(message, auxBuffer, regIP, regUDP);
+            if(strcmp(auxBuffer, "\0") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->ext);
             strcpy(nodo->ext, nodo->bck);
             strcpy(nodo->ipExt, nodo->ipBck);
             strcpy(nodo->portExt, nodo->portBck);

@@ -69,7 +69,8 @@ int main(int argc, char **argv)
         int word_count = 0;
 
         char *token = strtok(input, " ");
-        while (token != NULL && word_count < 20) {
+        while (token != NULL && word_count < 20)
+        {
             word_array[word_count++] = token;
             token = strtok(NULL, " ");
         }
@@ -148,16 +149,15 @@ int main(int argc, char **argv)
             errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, nodo->ip, nodo->port); //juntar strings para enviar
             if(errcode >= sizeof(message)) return -1;
 
-            printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
+            //printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
 
             memset(buffer,0,sizeof(buffer));
-            printf("%s", buffer);
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
             if(errcode != 0) return -1;
 
             printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
 
-            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, regIP, regUDP);
+            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, regIP, regUDP, arg1);
             else
             {
                 printf("UDP Error.");
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
             strcpy(nodo->ipBck, nodo->ip);
             strcpy(nodo->portBck, nodo->port);
 
-            tcpSelect(nodo, regIP, regUDP);
+            tcpSelect(nodo, regIP, regUDP, arg1);
         }
 
         if(strcmp(command, "leave") == 0) printf("Not yet on the network.\n");
