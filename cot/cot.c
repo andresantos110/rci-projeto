@@ -98,7 +98,7 @@ int main(int argc, char **argv)
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
             nNodes--;
             printf("Number of nodes in the network: %d\n", nNodes);
-            printf("These nodes are:\n%s", buffer);
+            if(nNodes>0) printf("These nodes are:\n%s\n", buffer);
 
             if(nNodes == 0)
             {
