@@ -125,8 +125,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                     strcpy(nodo->ext, nodo->intr[i]);
                                     strcpy(nodo->ipExt, nodo->ipIntr[i]);
                                     strcpy(nodo->portExt, nodo->portIntr[i]);
-                                    memset(nodo->ipIntr[i], 0, sizeof(nodo->intr[i]));
-                                    memset(nodo->portIntr[i], 0, sizeof(nodo->intr[i]));
+                                    memset(nodo->ipIntr[i], 0, sizeof(nodo->ipIntr[i]));
+                                    memset(nodo->portIntr[i], 0, sizeof(nodo->portIntr[i]));
                                     memset(nodo->intr[i], 0, sizeof(nodo->intr[i]));
                                     memset(message, 0, sizeof(message));
                                     snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
@@ -139,13 +139,18 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                     }
                     else
                     {
+
                         strcpy(nodo->ext, nodo->bck);
                         strcpy(nodo->ipExt, nodo->ipBck);
                         strcpy(nodo->portExt, nodo->portBck);
+
                         close(selfClient_fd);
+
+                        selfClient_fd = socket(AF_INET,SOCK_STREAM,0);
+
                         external_addr.sin_addr.s_addr = inet_addr(nodo->ipExt); //IP DO EXTERNO
                         external_addr.sin_port = htons(atoi(nodo->portExt)); //PORTA DO EXTERNO
-                        if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
+                        if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) printf("Connect errou");
                         memset(message, 0, sizeof(message));
                         snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
                         send(selfClient_fd, message , strlen(message) , 0 );
@@ -195,7 +200,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                 memset(nodo->intr[j], 0, sizeof(nodo->intr[j]));
                                 memset(message, 0, sizeof(message));
                                 snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
-                                send(i, message, sizeof(message), 0);
+                                send(j, message, sizeof(message), 0);
                                 break;
                             }
                         }
