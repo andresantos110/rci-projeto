@@ -34,3 +34,7 @@ para saber a que fd corresponde cada nó, guarda em intr[fd] o id do nó
 o que acontece no timeout?
 
 ports errados?
+
+quando nó sai, tira os outros
+
+rede cai passado algum tempo???

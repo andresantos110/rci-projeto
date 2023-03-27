@@ -56,24 +56,26 @@ int main(int argc, char **argv)
         arg5 = word_array[5];
     }*/
 
-    //ADICIONAR WHILE PARA NAO SAIR DO PROGRAMA DEPOIS DE 1 COMANDO
+
     while(1)
     {
 
         printf("Enter a command: \n");
         fgets(input, sizeof(input), stdin);
 
-        input[strcspn(input, "\n")] = 0; 
+        input[strcspn(input, "\n")] = '\0'; 
 
-        char *word_array[6]; 
+        char word_array[6][128]; 
         int word_count = 0;
 
         char *token = strtok(input, " ");
         while (token != NULL && word_count < 20)
         {
-            word_array[word_count++] = token;
+            strcpy(word_array[word_count++], token);
             token = strtok(NULL, " ");
         }
+
+        memset(input, 0, sizeof(input));
 
         command = word_array[0];
 
@@ -137,6 +139,7 @@ int main(int argc, char **argv)
                         printf("Node does not exist. Try again.\n");
                         sscanf("ERROR", "%s", input);
                     }
+
                 }
                 sscanf(line, "%s %s %s", nodo->ext, nodo->ipExt, nodo->portExt);
             }
@@ -163,6 +166,8 @@ int main(int argc, char **argv)
                 printf("UDP Error.");
                 exit(1);
             }
+            memset(input, 0, sizeof(input));
+            memset(buffer, 0, sizeof(buffer));
         }
 
         if(strcmp(command, "djoin") == 0) //arg1 = net; arg2 = id; arg3 = bootid; arg4 = bootIP; arg5=bootTCP
@@ -252,8 +257,6 @@ int main(int argc, char **argv)
         }
         else printf("Command not recognized.\n");
     }
-
-    //elsifs para comando nao reconhecido?
 
     /*free(nodo->id);
     free(nodo->ext);

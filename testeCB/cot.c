@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     nodo->bck = calloc(2, sizeof(char));
     nodo->ncontents = 0;
 
-
+    srand(time(0));
 
     if(argc != 5 && argc != 3) exit(1); //inicializacao dos valores dados como argumento
     if(argc == 3) 
@@ -56,23 +56,26 @@ int main(int argc, char **argv)
         arg5 = word_array[5];
     }*/
 
-    //ADICIONAR WHILE PARA NAO SAIR DO PROGRAMA DEPOIS DE 1 COMANDO
+
     while(1)
     {
 
         printf("Enter a command: \n");
         fgets(input, sizeof(input), stdin);
 
-        input[strcspn(input, "\n")] = 0; 
+        input[strcspn(input, "\n")] = '\0'; 
 
-        char *word_array[6]; 
+        char word_array[6][128]; 
         int word_count = 0;
 
         char *token = strtok(input, " ");
-        while (token != NULL && word_count < 20) {
-            word_array[word_count++] = token;
+        while (token != NULL && word_count < 20)
+        {
+            strcpy(word_array[word_count++], token);
             token = strtok(NULL, " ");
         }
+
+        memset(input, 0, sizeof(input));
 
         command = word_array[0];
 
@@ -97,6 +100,7 @@ int main(int argc, char **argv)
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
             nNodes--;
             printf("Number of nodes in the network: %d\n", nNodes);
+            if(nNodes>0) printf("These nodes are:\n%s\n", buffer);
 
             if(nNodes == 0)
             {
@@ -112,7 +116,7 @@ int main(int argc, char **argv)
 
                 if(strcmp(line, "\0") != 0)
                 {
-                    sprintf(nodo->id, "%d", atoi(arg2)+1);
+                    sprintf(nodo->id, "%d", rand()%100+1);
                     if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
                     {
                         strcpy(arg2, "0");
@@ -133,8 +137,8 @@ int main(int argc, char **argv)
                     if(strcmp(line, "\0") == 0)
                     {
                         printf("Node does not exist. Try again.\n");
-                        sscanf("ERROR", "%s", input);
                     }
+
                 }
                 sscanf(line, "%s %s %s", nodo->ext, nodo->ipExt, nodo->portExt);
             }
@@ -147,21 +151,22 @@ int main(int argc, char **argv)
             errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, nodo->ip, nodo->port); //juntar strings para enviar
             if(errcode >= sizeof(message)) return -1;
 
-            printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
+            //printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
 
             memset(buffer,0,sizeof(buffer));
-            printf("%s", buffer);
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
             if(errcode != 0) return -1;
 
             printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
 
-            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, regIP, regUDP);
+            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, regIP, regUDP, arg1);
             else
             {
                 printf("UDP Error.");
                 exit(1);
             }
+            memset(input, 0, sizeof(input));
+            memset(buffer, 0, sizeof(buffer));
         }
 
         if(strcmp(command, "djoin") == 0) //arg1 = net; arg2 = id; arg3 = bootid; arg4 = bootIP; arg5=bootTCP
@@ -187,7 +192,7 @@ int main(int argc, char **argv)
             strcpy(nodo->ipBck, nodo->ip);
             strcpy(nodo->portBck, nodo->port);
 
-            tcpSelect(nodo, regIP, regUDP);
+            tcpSelect(nodo, regIP, regUDP, arg1);
         }
 
         if(strcmp(command, "leave") == 0) printf("Not yet on the network.\n");
@@ -251,8 +256,6 @@ int main(int argc, char **argv)
         }
         else printf("Command not recognized.\n");
     }
-
-    //elsifs para comando nao reconhecido?
 
     /*free(nodo->id);
     free(nodo->ext);

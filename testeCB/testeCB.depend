@@ -37,10 +37,10 @@
 
 1679250375 /home/andre/Documents/testeCB/aux.h
 
-1679478321 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/aux.c
+1679860334 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/aux.c
 	"cot.h"
 
-1679677795 /home/andre/Documents/GitHub/rci-projeto/testeCB/cot.h
+1679860334 /home/andre/Documents/GitHub/rci-projeto/testeCB/cot.h
 	<stdio.h>
 	<stdlib.h>
 	<sys/types.h>
@@ -48,30 +48,32 @@
 	<netdb.h>
 	<string.h>
 	<unistd.h>
+	<time.h>
 
-1679677790 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/udp.c
+1679478938 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/udp.c
 	"cot.h"
 	"udp.h"
 
-1679677790 /home/andre/Documents/GitHub/rci-projeto/testeCB/udp.h
+1679309296 /home/andre/Documents/GitHub/rci-projeto/testeCB/udp.h
 	<arpa/inet.h>
 
-1679837973 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/cot.c
+1679942904 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/cot.c
 	"cot.h"
 	"udp.h"
 	"select.h"
 	"aux.h"
 
-1679677802 /home/andre/Documents/GitHub/rci-projeto/testeCB/select.h
+1679860334 /home/andre/Documents/GitHub/rci-projeto/testeCB/select.h
 	<errno.h>
 	<netinet/in.h>
 	<sys/time.h>
 	<arpa/inet.h>
 
-1679250375 /home/andre/Documents/GitHub/rci-projeto/testeCB/aux.h
+1679860334 /home/andre/Documents/GitHub/rci-projeto/testeCB/aux.h
 
-1679837688 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/select.c
+1679942105 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/select.c
 	"cot.h"
 	"select.h"
 	"udp.h"
+	"aux.h"
 
