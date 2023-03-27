@@ -9,8 +9,9 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     int num_clients = 0;
     int optval = 1;
     int i, j, fds;
-    int fn = 0; //indicador primeiro nó
+    int fn = 1; //indicador primeiro nó
     int errcode;
+    int client_fd;
     char buffer[1024+1], input[128+1], message[128+1];
 
     memset(buffer, 0, sizeof(buffer));
@@ -59,10 +60,9 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
     max_fd = max3(server_fd, STDIN_FILENO, selfClient_fd);
     //max_fd = max(server_fd, STDIN_FILENO);
-
     while(1)
     {
-        FD_SET(selfClient_fd, &read_fds);
+        if(fn == 0) FD_SET(selfClient_fd, &read_fds);
         FD_SET(server_fd, &read_fds);
         FD_SET(STDIN_FILENO, &read_fds);
 
@@ -77,14 +77,10 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 max_fd = fds;
         }
 
-
         if(select(max_fd +1, &read_fds, NULL, NULL, NULL) == -1) exit(1);
 
         if(FD_ISSET(server_fd, &read_fds)) //ligacao ao servidor
         {
-            FD_CLR(server_fd, &read_fds);
-
-            int client_fd;
             client_fd = accept(server_fd, (struct sockaddr*)&client_addr, & client_addrlen);
             if(client_fd == -1) exit(1);
 
@@ -101,12 +97,15 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                     break;
                 }
             }
+            FD_CLR(server_fd, &read_fds);
         }
         if(fn == 0)
         {
             if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo - nao esta a entrar?
             {
-                if(commTCP(selfClient_fd, nodo, regIP, regUDP, net) == 1) //externo saiu, enviar a novo externo NEW
+                errcode = commTCP(selfClient_fd, nodo, regIP, regUDP, net);
+                printf("%d", errcode);
+                if(errcode == 1) //externo saiu, enviar a novo externo NEW
                 {
                     if(strcmp(nodo->bck, nodo->id) == 0)  //se for ancora e sair externo, tem de promover interno caso seja possivel
                     {//verificar se tem internos, promover se tiver, ext = id se nao
@@ -133,7 +132,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                     send(i, message, sizeof(message), 0);
                                     break;
                                 }
-                            } 
+                            }
                         }
 
                     }
@@ -325,6 +324,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 else printf("Resuming...\n");
             }
             else printf("Command not recognized.\n");
+            FD_CLR(STDIN_FILENO, &read_fds);
 
 
 
