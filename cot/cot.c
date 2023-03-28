@@ -8,7 +8,7 @@ int main(int argc, char **argv)
     char regIP[16], regUDP[6];
     char buffer[1024+1];
     char message[128+1] = "NODES ";
-    char input[128], extInput[3];
+    char input[128];
     char line[32];
     char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
     int errcode, i;
@@ -115,30 +115,39 @@ int main(int argc, char **argv)
 
                 if(strcmp(line, "\0") != 0)
                 {
-                    sprintf(nodo->id, "%d", rand()%100+1);
-                    if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
+                    while(strcmp(line, "\0") != 0)
                     {
-                        strcpy(arg2, "0");
-                        strcat(arg2, nodo->id);
-                        strcpy(nodo->id, arg2);
+                        sprintf(nodo->id, "%d", rand()%100+1);
+                        if(strcmp(nodo->id, "100") == 0) strcpy(nodo->id, "49");
+                        memset(line, 0, sizeof(line));
+                        if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
+                        {
+                            strcpy(arg2, "0");
+                            strcat(arg2, nodo->id);
+                            strcpy(nodo->id, arg2);
+                        }
+                        findNode(buffer, line, nNodes, nodo->id);
                     }
                     printf("Node already exists. New id: %s\n", nodo->id);
                 }
                 else strcpy(nodo->id, arg2);
 
-                while(strlen(input) != 3)
+                strcpy(nodo->ext, nodo->id);
+
+                while(strcmp(nodo->ext, nodo->id) == 0)
                 {
                     printf("Select the node to connect to:\n");
-                    fgets(extInput, sizeof(extInput), stdin);
-                    strcpy(&nodo->ext, extInput); //write invalido, fix in progress
-                    if(strlen(input) != 3) printf("Please enter two characters.\n");
+                    fgets(input, sizeof(input), stdin);
+                    input[strcspn(input, "\n")] = 0;
+                    strcpy(nodo->ext, input);
+                    if(strlen(nodo->ext) != 2) printf("Please enter two characters.\n");
                     findNode(buffer, line, nNodes, nodo->ext);
                     if(strcmp(line, "\0") == 0)
                     {
                         printf("Node does not exist. Try again.\n");
-                        sscanf("ERROR", "%s", input);
+                        strcpy(nodo->ext, nodo->id);
                     }
-
+                    memset(input, 0, sizeof(input));
                 }
                 sscanf(line, "%s %s %s", nodo->ext, nodo->ipExt, nodo->portExt);
             }
