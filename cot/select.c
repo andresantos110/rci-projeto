@@ -351,6 +351,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
             else if(strcmp(command, "get") == 0)
             {
+                if(word_count != 3 ) printf("Invalid Input.\n");
+
                 int k=0;
                 arg1 = word_array[1];
                 arg2 = word_array[2];
@@ -358,7 +360,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 memset(message,0,sizeof(message));
                 memset(buffer,0,sizeof(buffer));
 
-                snprintf(message, sizeof(message), "%s %s", "NODES", "869");
+                snprintf(message, sizeof(message), "%s %s", "NODES", "869"); // MUDAR PARA O ID DA REDE
 
                 if(strncmp(message, "NODES", 5) != 0) printf("Erro");
                 errcode = commUDP(message, buffer, regIP, regUDP);
@@ -381,7 +383,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
                 if(strcmp(line, "\0") == 0)
                 {
-                    printf("Node %s not found in network.\n", arg1);
+                    printf("Node %s not found in network.\n", arg1); // neste if eno proximo ele tem de aceitar o comando seguinte (ta a crashar)
                 }
                 if(strcmp(arg1, nodo->id) == 0)
                 {
@@ -443,7 +445,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
     char auxBuffer[1024+1];
     char message[1024+1];
     char command[16], arg1[32], arg2[32], arg3[32];
-    int i = 0, k = 0, u = 0, l = 0, flg = 0 ;
+    int i = 0, k = 0, u = 0, l = 0, flg = 0 , flg2 = 0;
 
     //if(read(fd, buffer, 1024) == 0) return 0;
     //else return 1;
@@ -466,8 +468,6 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
         {
             if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
             {
-
-
                 strcpy(nodo->intr[i], "\0");
                 strcpy(nodo->ipIntr[i], "\0");
                 strcpy(nodo->portIntr[i], "\0"); //limpar informacao do nó que saiu
@@ -475,7 +475,8 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             }
         }
 
-	    if(strcmp(nodo->bck, nodo->id) == 0) return 1; //verificar se é ancora - sabe-se que nao saiu interno logo saiu a outra ancora(ext)
+		if(strcmp(nodo->bck, nodo->id) == 0) return 1;
+        }
         else //se nao for ancora, apenas saiu um externo
         {
             strcpy(nodo->ext, nodo->bck);
@@ -517,6 +518,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
                 send(fd, message, strlen(message), 0);
             }
+            memset(buffer,0,sizeof(buffer));
         }
         if(strstr(buffer, "EXTERN") != NULL) //se for null
         {
@@ -524,12 +526,15 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             strcpy(nodo->bck, arg1);
             strcpy(nodo->ipBck, arg2);
             strcpy(nodo->portBck, arg3);
+            memset(buffer,0,sizeof(buffer));
         }
 
         if(strstr(buffer, "QUERY") != NULL)
         {
             printf("recebi um ola\n");
             flg = 0;
+            flg2 = 0;
+
             sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
 
             updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
@@ -538,27 +543,32 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             {
                 if(nodo->ncontents == 0)
                 {
-                    snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", nodo->id, arg1, arg2);
+                    snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT",  arg2, nodo->id, arg3);
+                    send(fd, message, strlen(message), 0);
+                    flg2 = 1;
+                }
+                if(flg2 == 0)
+                {
+                    for (k = 0; k < 31; k++)
+                    {
+                        if(nodo->content[k] != NULL){
+                            if(strcmp(arg3, nodo->content[k]) == 0)
+                            {
+                                snprintf(message, sizeof(message), "%s %s %s %s", "CONTENT",  arg2, nodo->id, arg3);
+                                send(fd, message, strlen(message), 0);
+                                flg2 = 2;
+                                break;
+                            }
+                        }
+
+                    }
+                }
+                if(flg2 == 0)
+                {
+                    snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT",  arg2, nodo->id, arg3);
                     send(fd, message, strlen(message), 0);
                 }
-                for (k = 0; k < 32; k++)
-                {
-
-                    if(k == 31)
-                    {
-                        snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", nodo->id, arg1, arg2);
-                        send(fd, message, strlen(message), 0);
-                        break;
-                    }
-                    if(strcmp(nodo->content[k], arg2) == 0)
-                    {
-                        snprintf(message, sizeof(message), "%s %s %s %s", "CONTENT", nodo->id, arg1, arg2);
-                        send(fd, message, strlen(message), 0);
-                        break;
-                    }
-                }
             }
-
             else
             {
                 snprintf(message, sizeof(message), "%s %s %s %s", "QUERY", arg1, arg2, arg3);
@@ -607,6 +617,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
             printf("%s   %s\n",nodo->table1[0], nodo->table2[0]);
             printf("%s   %s\n",nodo->table1[1], nodo->table2[1]);
+            memset(buffer,0,sizeof(buffer));
         }
 
         if(strstr(buffer, "CONTENT") != NULL)
@@ -614,7 +625,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
             updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
 
-            sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
+            /*sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
 
             if(strcmp(arg1, nodo->id) == 0)
             {
@@ -624,7 +635,8 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             {
                 snprintf(message, sizeof(message), "%s %s %s %s", "CONTENT", arg1, arg2, arg3);
                 send(fd, message, strlen(message), 0);
-            }
+            }*/
+            memset(buffer,0,sizeof(buffer));
         }
 
         if(strstr(buffer, "NOCONTENT") != NULL)
@@ -634,11 +646,17 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
             sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
 
-            if(strcmp(arg1, nodo->id) == 0)
+            /*if(strcmp(arg1, nodo->id) == 0)
             {
                 printf("Não encontrei o ficheiro\n");
             }
             else
+            {
+                snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", arg1, arg2, arg3);
+                send(fd, message, strlen(message), 0);
+            }*/
+            // NAO ATIVAR
+            /*else
             {
                 snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", arg1, arg2, arg3);
                 for (int i = 0; i < 100; i++)
@@ -649,7 +667,8 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                         break;
                     }
                 }
-            }
+            }*/
+            memset(buffer,0,sizeof(buffer));
         }
         if(strstr(buffer, "WITHDRAW") != NULL)
         {
@@ -671,6 +690,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             {
 
             }*/
+            memset(buffer,0,sizeof(buffer));
         }
         return 2;
     }
