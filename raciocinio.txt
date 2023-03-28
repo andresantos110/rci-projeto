@@ -46,6 +46,8 @@ TIRAR OUTRO DA REDE SE NAO RECONHECER
 
 METER \nS mensagens
 
-mensagem para user no servidor quando recebe ligacao
+mensagem para user no servidor quando recebe ligacao - estao a dar print depois?
+
+meter NO INTERNS quando nao ha internos
 
 cuidado com seg faults a ler comando dentro do select
