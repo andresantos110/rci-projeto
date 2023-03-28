@@ -51,6 +51,6 @@ int main(int argc, char **argv)
 
     }
 
-    printf("ta feito o esparguete");
+    printf("NET %s CLEARED\n", argv[1]);
 
 }

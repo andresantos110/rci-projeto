@@ -19,9 +19,17 @@ int main(int argc, char **argv)
 
     nodo->ncontents = 0;
 
+    memset(buffer, 0, sizeof(buffer));
+
     srand(time(0));
 
-    if(argc != 5 && argc != 3) exit(1); //inicializacao dos valores dados como argumento
+    if(argc != 5 && argc != 3)
+    {
+        free(nodo);
+        printf("Arguments missing. Exiting\n");
+        exit(1);
+    } 
+    //inicializacao dos valores dados como argumento
     if(argc == 3)
     {
        strcpy (regIP, "193.136.138.142");
@@ -87,19 +95,32 @@ int main(int argc, char **argv)
             }
             arg1 = word_array[1];
             arg2 = word_array[2];
-            if(strlen(arg1) != 3) exit(1);
+
+            if(strlen(arg1) != 3)
+            {
+                printf("Invalid argument (%s). Exiting.\n", arg1);
+                exit(1);
+            }
+
+            if(atoi(arg2) > 99 || atoi(arg2) < 0)
+            {
+                printf("Invalid node number. Exiting.\n");
+                exit(1);
+            }
 
             strcat(message, arg1);
 
             errcode = commUDP(message, buffer, regIP, regUDP);
-            if(errcode != 0) return -1;
-
-            //printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
+            if(errcode != 0)
+            {
+                printf("UDP Error. Exiting");
+                exit(1);
+            }
 
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
             nNodes--;
             printf("Number of nodes in the network: %d\n", nNodes);
-            if(nNodes>0) printf("These nodes are:\n%s\n", buffer);
+            if(nNodes>0) printf("These nodes are:\n%s", buffer);
 
             if(nNodes == 0)
             {
@@ -166,8 +187,6 @@ int main(int argc, char **argv)
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
             if(errcode != 0) return -1;
 
-            printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
-
             if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, regIP, regUDP, arg1);
             else
             {
@@ -191,6 +210,36 @@ int main(int argc, char **argv)
             arg3 = word_array[3];
             arg4 = word_array[4];
             arg5 = word_array[5];
+
+            if(strlen(arg1) != 3)
+            {
+                printf("Invalid argument (%s). Exiting.\n", arg1);
+                exit(1);
+            }
+
+            if(atoi(arg2) > 99 || atoi(arg2) < 1)
+            {
+                printf("Invalid node number. Exiting.\n");
+                exit(1);
+            }
+
+            if(atoi(arg3) > 99 || atoi(arg3) < 1)
+            {
+                printf("Invalid argument (%s). Exiting.\n", arg3);
+                exit(1);
+            }
+
+            if(strlen(arg4) != 15)
+            {
+                printf("Invalid argument (%s). Exiting.\n", arg4);
+                exit(1);
+            }
+
+            if(strlen(arg4) != 5)
+            {
+                printf("Invalid argument (%s). Exiting.\n", arg5);
+                exit(1);
+            }
 
             strcpy(nodo->id, arg2);
             strcpy(nodo->ext, arg3);

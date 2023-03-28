@@ -269,7 +269,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 memset(message,0,sizeof(message));
                 memset(buffer,0,sizeof(buffer));
                 free(nodo);
-                printf("Left the network, exiting...");
+                printf("Left the network, exiting...\n");
                 exit(0);
             }
 
