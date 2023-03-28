@@ -43,3 +43,13 @@ quando nó sai, tira os outros - funcao para remover caso nao avise BUG SAI TUDO
 COMMTPC NOVO FICHEIRO
 
 WITHDRAW
+
+INTERFACE A ENTRAR done
+
+ENTER COMMAND DEPOIS DE ENTRAR
+
+TIMERS NO UDP done
+
+TIRAR OUTRO DA REDE SE NAO RECONHECER
+
+METER \nS

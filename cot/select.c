@@ -10,7 +10,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     int optval = 1;
     int i, j, fds;
     int fn = 0; //indicador primeiro nó
-    int errcode;
+    int errcode = 0;
     int nNodes = 0;
     char line[32];
     char buffer[1024+1], input[128+1], message[128+1];
@@ -252,8 +252,18 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->id);
                 if(strncmp(message, "UNREG", 5) != 0) printf("Erro");
                 //if(snprintf(message, sizeof(message), "%s %s %s", "UNREG", "105", nodo->id) !=0) exit(1); //erro neste snprintf
-                if(commUDP(message, buffer, regIP, regUDP) != 0) exit(1);
-                printf("Enviada: %s\nRecebida: %s\n", message, buffer);
+                errcode = commUDP(message, buffer, regIP, regUDP);
+                if(errcode == 1)
+                {
+                    printf("UDP Error. Exiting");
+                    free(nodo);
+                    exit(1);
+                }
+                if(errcode == -1)
+                {
+                    printf("Could not communicate with node server.\n");
+                    exit(1);
+                }
                 if(strcmp(buffer, "OKUNREG") == 0) printf("Unreg successful - leaving network...\n");
                 FD_ZERO(&read_fds);
                 close(server_fd);
@@ -351,7 +361,18 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 snprintf(message, sizeof(message), "%s %s", "NODES", "869");
 
                 if(strncmp(message, "NODES", 5) != 0) printf("Erro");
-                if(commUDP(message, buffer, regIP, regUDP) != 0) printf("Erro");
+                errcode = commUDP(message, buffer, regIP, regUDP);
+                if(errcode == 1)
+                {
+                    printf("UDP Error. Exiting");
+                    free(nodo);
+                    exit(1);
+                }
+                if(errcode == -1)
+                {
+                    printf("Could not communicate with node server.\n");
+                    exit(1);
+                }
 
                 for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
                 nNodes--;
@@ -445,11 +466,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
         {
             if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
             {
-               /* memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
-                snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->intr[i]);
-                commUDP(message, auxBuffer, regIP, regUDP);
-                if(strcmp(auxBuffer, "OKUNREG") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->intr[i]);
-*/
+
 
                 strcpy(nodo->intr[i], "\0");
                 strcpy(nodo->ipIntr[i], "\0");
@@ -458,21 +475,9 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             }
         }
 
-	    if(strcmp(nodo->bck, nodo->id) == 0) //verificar se é ancora - sabe-se que nao saiu interno logo saiu a outra ancora(ext)
-        {
-            /*memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
-            snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->ext);
-            commUDP(message, auxBuffer, regIP, regUDP);
-            if(strcmp(auxBuffer, "OKUNREG") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->ext);*/
-            return 1;
-        }
+	    if(strcmp(nodo->bck, nodo->id) == 0) return 1; //verificar se é ancora - sabe-se que nao saiu interno logo saiu a outra ancora(ext)
         else //se nao for ancora, apenas saiu um externo
         {
-            //verificar se nó está registado
-            /*memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
-            snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->ext);
-            commUDP(message, auxBuffer, regIP, regUDP);
-            if(strcmp(auxBuffer, "OKUNREG") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->ext);*/
             strcpy(nodo->ext, nodo->bck);
             strcpy(nodo->ipExt, nodo->ipBck);
             strcpy(nodo->portExt, nodo->portBck);

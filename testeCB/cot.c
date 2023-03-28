@@ -15,18 +15,25 @@ int main(int argc, char **argv)
     int nNodes = 0;
     struct node *nodo = (struct node*) malloc (sizeof(struct node));
 
-    nodo->id = calloc(2, sizeof(char));
-    nodo->ext = calloc(2, sizeof(char));
-    nodo->bck = calloc(2, sizeof(char));
+    initNode(nodo);
+
     nodo->ncontents = 0;
+
+    memset(buffer, 0, sizeof(buffer));
 
     srand(time(0));
 
-    if(argc != 5 && argc != 3) exit(1); //inicializacao dos valores dados como argumento
-    if(argc == 3) 
+    if(argc != 5 && argc != 3)
+    {
+        free(nodo);
+        printf("Arguments missing. Exiting\n");
+        exit(1);
+    } 
+    //inicializacao dos valores dados como argumento
+    if(argc == 3)
     {
        strcpy (regIP, "193.136.138.142");
-       strcpy (regUDP, "59000"); 
+       strcpy (regUDP, "59000");
     }
     if(argc == 5)
     {
@@ -60,12 +67,15 @@ int main(int argc, char **argv)
     while(1)
     {
 
-        printf("Enter a command: \n");
+        printf("Enter a command:\n");
+        printf("join - Join the network\ndjoin - Join a known network\ncreate - Create a new content\ndelete - Delete existing content\n");
+        printf("get - Find content location\nst - Show node topology\nsn - Show contents\nsr - Show node routing\n");
+        printf("leave - Leave the network\nexit - Close application\n");
         fgets(input, sizeof(input), stdin);
 
-        input[strcspn(input, "\n")] = '\0'; 
+        input[strcspn(input, "\n")] = '\0';
 
-        char word_array[6][128]; 
+        char word_array[6][128];
         int word_count = 0;
 
         char *token = strtok(input, " ");
@@ -74,8 +84,6 @@ int main(int argc, char **argv)
             strcpy(word_array[word_count++], token);
             token = strtok(NULL, " ");
         }
-
-        memset(input, 0, sizeof(input));
 
         command = word_array[0];
 
@@ -88,58 +96,85 @@ int main(int argc, char **argv)
             }
             arg1 = word_array[1];
             arg2 = word_array[2];
-            if(strlen(arg1) != 3) exit(1);
+
+            if(strlen(arg1) != 3)
+            {
+                printf("Invalid argument (%s). Exiting.\n", arg1);
+                exit(1);
+            }
+
+            if(atoi(arg2) > 99 || atoi(arg2) < 0)
+            {
+                printf("Invalid node number. Exiting.\n");
+                exit(1);
+            }
 
             strcat(message, arg1);
 
             errcode = commUDP(message, buffer, regIP, regUDP);
-            if(errcode != 0) return -1;
-
-            //printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
+            if(errcode == 1)
+            {
+                printf("UDP Error. Exiting");
+                exit(1);
+            }
+            if(errcode == -1)
+            {
+                printf("Could not communicate with node server.\n");
+                break;
+            }
 
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
             nNodes--;
             printf("Number of nodes in the network: %d\n", nNodes);
-            if(nNodes>0) printf("These nodes are:\n%s\n", buffer);
+            if(nNodes>0) printf("These nodes are:\n%s", buffer);
 
             if(nNodes == 0)
             {
                 strcpy(nodo->id, arg2);
                 strcpy(nodo->ext, arg2);
                 strcpy(nodo->bck, arg2);
-                strcpy(nodo->ipExt, "\0");
-                strcpy(nodo->portExt, "\0");
-            }     
+                strcpy(nodo->ipExt, nodo->ip);
+                strcpy(nodo->portExt, nodo->port);
+            }
             else
             {
                 findNode(buffer, line, nNodes, arg2);
 
                 if(strcmp(line, "\0") != 0)
                 {
-                    sprintf(nodo->id, "%d", rand()%100+1);
-                    if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
+                    while(strcmp(line, "\0") != 0)
                     {
-                        strcpy(arg2, "0");
-                        strcat(arg2, nodo->id);
-                        strcpy(nodo->id, arg2);
+                        sprintf(nodo->id, "%d", rand()%100+1);
+                        if(strcmp(nodo->id, "100") == 0) strcpy(nodo->id, "49");
+                        memset(line, 0, sizeof(line));
+                        if(strlen(nodo->id) == 1) //colocar um 0 antes do id caso este seja apenas um caracter
+                        {
+                            strcpy(arg2, "0");
+                            strcat(arg2, nodo->id);
+                            strcpy(nodo->id, arg2);
+                        }
+                        findNode(buffer, line, nNodes, nodo->id);
                     }
                     printf("Node already exists. New id: %s\n", nodo->id);
                 }
                 else strcpy(nodo->id, arg2);
 
-                while(strlen(input) != 3)
+                strcpy(nodo->ext, nodo->id);
+
+                while(strcmp(nodo->ext, nodo->id) == 0)
                 {
                     printf("Select the node to connect to:\n");
                     fgets(input, sizeof(input), stdin);
-                    sscanf(input, "%s", nodo->ext);
-                    if(strlen(input) != 3) printf("Please enter two characters.\n");
+                    input[strcspn(input, "\n")] = 0;
+                    strcpy(nodo->ext, input);
+                    if(strlen(nodo->ext) != 2) printf("Please enter two characters.\n");
                     findNode(buffer, line, nNodes, nodo->ext);
                     if(strcmp(line, "\0") == 0)
                     {
                         printf("Node does not exist. Try again.\n");
-                        sscanf("ERROR", "%s", input);
+                        strcpy(nodo->ext, nodo->id);
                     }
-
+                    memset(input, 0, sizeof(input));
                 }
                 sscanf(line, "%s %s %s", nodo->ext, nodo->ipExt, nodo->portExt);
             }
@@ -158,9 +193,13 @@ int main(int argc, char **argv)
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
             if(errcode != 0) return -1;
 
-            printf("Sent:\n%s\nReceived:\n%s\n", message, buffer);
-
-            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, regIP, regUDP, arg1);
+            if(strcmp(nodo->ext, nodo->id) == 0) printf("First node to join.\n");
+            else printf("Connecting to node %s with IP %s and port %s\n", nodo->ext, nodo->ipExt, nodo->portExt);
+            if(strcmp(buffer, "OKREG") == 0)
+            {
+                printf("Joining network %s...\n", arg1);
+                tcpSelect(nodo, regIP, regUDP, arg1);
+            }
             else
             {
                 printf("UDP Error.");
@@ -184,6 +223,36 @@ int main(int argc, char **argv)
             arg4 = word_array[4];
             arg5 = word_array[5];
 
+            if(strlen(arg1) != 3)
+            {
+                printf("Invalid argument (%s). Exiting.\n", arg1);
+                exit(1);
+            }
+
+            if(atoi(arg2) > 99 || atoi(arg2) < 1)
+            {
+                printf("Invalid node number. Exiting.\n");
+                exit(1);
+            }
+
+            if(atoi(arg3) > 99 || atoi(arg3) < 1)
+            {
+                printf("Invalid argument (%s). Exiting.\n", arg3);
+                exit(1);
+            }
+
+            if(strlen(arg4) != 15)
+            {
+                printf("Invalid argument (%s). Exiting.\n", arg4);
+                exit(1);
+            }
+
+            if(strlen(arg4) != 5)
+            {
+                printf("Invalid argument (%s). Exiting.\n", arg5);
+                exit(1);
+            }
+
             strcpy(nodo->id, arg2);
             strcpy(nodo->ext, arg3);
             strcpy(nodo->ipExt, arg4);
@@ -202,9 +271,6 @@ int main(int argc, char **argv)
         else if(strcmp(command, "get") == 0) printf("Not yet on the network.\n");
         else if(strcmp(command, "exit") == 0)
         {
-            free(nodo->id);
-            free(nodo->ext);
-            free(nodo->bck);
             free(nodo);
             return 0;
             //free memoria conteudos?

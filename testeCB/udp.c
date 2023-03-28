@@ -10,8 +10,22 @@ int commUDP(char mensagem[], char buffer[], char regIP[], char regUDP[])
     struct sockaddr addr;
     socklen_t addrlen;
 
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 100000;
+
     fd = socket(AF_INET,SOCK_DGRAM,0); //abrir socket UDP
-    if(fd == -1) exit(1);
+    if(fd == -1)
+    {
+        printf("Error opening UDP Socket - Exiting...\n");
+        exit(1);
+    }
+
+    if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+    {
+        printf("Error setting UDP socket options - Exiting...\n");
+        exit(1);
+    }
 
     memset(&hints,0,sizeof hints);
     hints.ai_family = AF_INET; //ipv4
@@ -24,8 +38,11 @@ int commUDP(char mensagem[], char buffer[], char regIP[], char regUDP[])
     if(n == -1) exit (1);
 
     addrlen=sizeof(addr);
-    n = recvfrom(fd, buffer, 1024, 0, &addr, &addrlen); //receber mensagem
-    if(n == -1) exit (1);
+    if(recvfrom(fd, buffer, 1024, 0, &addr, &addrlen) < 0)//receber mensagem -- verificar timeout
+    {
+        printf("UDP Timeout reached.");
+        return -1;
+    }
 
     struct sockaddr_in *addr_in = (struct sockaddr_in *)&addr; //verificar se mensagem vem de destinatário
     if(strcmp(inet_ntoa(addr_in->sin_addr), regIP) == 0) return 0;
