@@ -218,9 +218,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
                 }
 
-                else printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
-                //remover else, para teste apenas
-
                 //if(num_clients == 0) max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
                 if(num_clients == 0) max_fd = max3(server_fd, STDIN_FILENO, selfClient_fd);
             }
