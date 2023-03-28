@@ -40,16 +40,8 @@ TODO:
 
 quando nó sai, tira os outros - funcao para remover caso nao avise BUG SAI TUDO 
 
-COMMTPC NOVO FICHEIRO
-
 WITHDRAW
-
-ENTER COMMAND DEPOIS DE ENTRAR na rede
 
 TIRAR OUTRO DA REDE SE NAO RECONHECER
 
-METER \nS
-
-tirar print de new connection
-
-\ns em st
+METER \nS mensagens

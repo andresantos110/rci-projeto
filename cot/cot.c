@@ -64,10 +64,9 @@ int main(int argc, char **argv)
     }*/
 
 
+    printf("cot - Group 105\n");
+    printf("Type help to show available commands.\n");
     printf("Enter a command:\n");
-    printf("join - Join the network\ndjoin - Join a known network\n");
-    printf("create - Create a new content\ndelete - Delete existing content\nsn - Show contents\n");
-    printf("exit - Close application\nMore commands available after joining a network.\n");
 
     while(1)
     {
@@ -130,7 +129,7 @@ int main(int argc, char **argv)
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
             nNodes--;
             printf("Number of nodes in the network: %d\n", nNodes);
-            if(nNodes>0) printf("These nodes are:\n%s", buffer);
+            if(nNodes>0) printf("These nodes are:\n%s", buffer+14);
 
             if(nNodes == 0)
             {
@@ -334,6 +333,12 @@ int main(int argc, char **argv)
                     printf("%d. %s\n", i, nodo->content[i]);
                 }
             }
+        }
+        else if(strcmp(command, "help") == 0)
+        {
+            printf("join - Join the network\ndjoin - Join a known network\n");
+            printf("create - Create a new content\ndelete - Delete existing content\nsn - Show contents\n");
+            printf("exit - Close application\nMore commands available after joining a network.\n");
         }
         else printf("Command not recognized.\n");
     }
