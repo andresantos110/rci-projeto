@@ -75,6 +75,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 strcpy(nodo->portExt, arg3);
                 snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
                 send(fd, message, strlen(message), 0);
+                //printf("Incoming connection from node %s", nodo->ext);
             }
             else //se nao for o primeiro nó
             {
@@ -84,6 +85,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 strcpy(nodo->portIntr[fd], arg3);
                 snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
                 send(fd, message, strlen(message), 0);
+                //printf("Incoming connection from node %s", nodo->intr[fd]);
             }
             memset(buffer,0,sizeof(buffer));
         }

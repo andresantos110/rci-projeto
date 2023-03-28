@@ -65,8 +65,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     max_fd = max(server_fd, STDIN_FILENO);
     if(selfClient_fd > max_fd) max_fd = selfClient_fd;
 
-    printf("Enter a command:\n");
     printf("Type help to display available commands.\n");
+    printf("Enter a command:\n");
 
     while(1)
     {
@@ -95,6 +95,9 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             int client_fd;
             client_fd = accept(server_fd, (struct sockaddr*)&client_addr, & client_addrlen);
             if(client_fd == -1) exit(1);
+
+            printf("New connection , socket fd is %d , ip is : %s , port : %d\n" , client_fd, inet_ntoa(client_addr.sin_addr) , ntohs
+                  (client_addr.sin_port));
 
             for (int i = 0; i < 100; i++)
             {

@@ -45,3 +45,7 @@ WITHDRAW
 TIRAR OUTRO DA REDE SE NAO RECONHECER
 
 METER \nS mensagens
+
+mensagem para user no servidor quando recebe ligacao
+
+cuidado com seg faults a ler comando dentro do select
