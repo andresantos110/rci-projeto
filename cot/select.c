@@ -19,7 +19,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     memset(input, 0, sizeof(input));
     memset(message, 0, sizeof(message));
 
-    char *command, *arg1, *arg2;
+    char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
 
     struct sockaddr_in server_addr, client_addr, external_addr;
     socklen_t client_addrlen = sizeof(client_addr);
