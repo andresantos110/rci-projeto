@@ -64,13 +64,13 @@ int main(int argc, char **argv)
     }*/
 
 
+    printf("Enter a command:\n");
+    printf("join - Join the network\ndjoin - Join a known network\n");
+    printf("create - Create a new content\ndelete - Delete existing content\nsn - Show contents\n");
+    printf("exit - Close application\nMore commands available after joining a network.\n");
+
     while(1)
     {
-
-        printf("Enter a command:\n");
-        printf("join - Join the network\ndjoin - Join a known network\ncreate - Create a new content\ndelete - Delete existing content\n");
-        printf("get - Find content location\nst - Show node topology\nsn - Show contents\nsr - Show node routing\n");
-        printf("leave - Leave the network\nexit - Close application\n");
         fgets(input, sizeof(input), stdin);
 
         input[strcspn(input, "\n")] = '\0';
@@ -92,6 +92,7 @@ int main(int argc, char **argv)
             if(word_count != 3)
             {
                 printf("Arguments missing. Exiting.\n");
+                free(nodo);
                 exit(1);
             }
             arg1 = word_array[1];
@@ -100,12 +101,14 @@ int main(int argc, char **argv)
             if(strlen(arg1) != 3)
             {
                 printf("Invalid argument (%s). Exiting.\n", arg1);
+                free(nodo);
                 exit(1);
             }
 
             if(atoi(arg2) > 99 || atoi(arg2) < 0)
             {
                 printf("Invalid node number. Exiting.\n");
+                free(nodo);
                 exit(1);
             }
 
@@ -115,12 +118,13 @@ int main(int argc, char **argv)
             if(errcode == 1)
             {
                 printf("UDP Error. Exiting");
+                free(nodo);
                 exit(1);
             }
             if(errcode == -1)
             {
                 printf("Could not communicate with node server.\n");
-                break;
+                exit(1);
             }
 
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
@@ -191,7 +195,17 @@ int main(int argc, char **argv)
 
             memset(buffer,0,sizeof(buffer));
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
-            if(errcode != 0) return -1;
+            if(errcode == 1)
+            {
+                printf("UDP Error. Exiting");
+                free(nodo);
+                exit(1);
+            }
+            if(errcode == -1)
+            {
+                printf("Could not communicate with node server.\n");
+                exit(1);
+            }
 
             if(strcmp(nodo->ext, nodo->id) == 0) printf("First node to join.\n");
             else printf("Connecting to node %s with IP %s and port %s\n", nodo->ext, nodo->ipExt, nodo->portExt);
@@ -324,17 +338,7 @@ int main(int argc, char **argv)
         else printf("Command not recognized.\n");
     }
 
-    /*free(nodo->id);
-    free(nodo->ext);
-    free(nodo->bck);
-    free(nodo);*/
-
-
-    //errcode = commUDP(message, buffer, regIP, regUDP);
-
-        //if(errcode != 0) return -1;
-        //else printf("Enviada: %s \nRecebida: %s\n", message, buffer);
-
+    free(nodo);
     return 0;
 }
 

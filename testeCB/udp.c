@@ -11,8 +11,8 @@ int commUDP(char mensagem[], char buffer[], char regIP[], char regUDP[])
     socklen_t addrlen;
 
     struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 100000;
+    tv.tv_sec = 5; //timeout de 5 segundos
+    tv.tv_usec = 0;
 
     fd = socket(AF_INET,SOCK_DGRAM,0); //abrir socket UDP
     if(fd == -1)
@@ -21,7 +21,7 @@ int commUDP(char mensagem[], char buffer[], char regIP[], char regUDP[])
         exit(1);
     }
 
-    if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+    if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) //definir timeout nas opcoes do socket
     {
         printf("Error setting UDP socket options - Exiting...\n");
         exit(1);
@@ -40,14 +40,25 @@ int commUDP(char mensagem[], char buffer[], char regIP[], char regUDP[])
     addrlen=sizeof(addr);
     if(recvfrom(fd, buffer, 1024, 0, &addr, &addrlen) < 0)//receber mensagem -- verificar timeout
     {
-        printf("UDP Timeout reached.");
+        freeaddrinfo(res);
+        close(fd);
+        printf("UDP Timeout reached.\n");
         return -1;
     }
 
     struct sockaddr_in *addr_in = (struct sockaddr_in *)&addr; //verificar se mensagem vem de destinatário
-    if(strcmp(inet_ntoa(addr_in->sin_addr), regIP) == 0) return 0;
-
-    freeaddrinfo(res);
-    close(fd);
+    if(strcmp(inet_ntoa(addr_in->sin_addr), regIP) == 0)
+    {
+        freeaddrinfo(res);
+        close(fd);
+        return 0;
+    }
+    else
+    {
+        printf("Received unexpected message - exiting");
+        freeaddrinfo(res);
+        close(fd);
+        exit(1);
+    }
     return 1;
 }
