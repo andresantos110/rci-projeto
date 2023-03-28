@@ -53,6 +53,11 @@ int initNode(struct node *nodo)
     }
     return 0;
 
+    for(i = 0; i < 100; i++)
+    {
+        memset(nodo->table1[i], 0, sizeof(nodo->table1[i]));
+        memset(nodo->table2[i], 0, sizeof(nodo->table2[i]));
+    }
 }
 
 

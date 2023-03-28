@@ -1,5 +1,5 @@
-#include <errno.h> 
-#include <netinet/in.h> 
+#include <errno.h>
+#include <netinet/in.h>
 #include <sys/time.h>
 #include <arpa/inet.h>
 
@@ -9,4 +9,4 @@
 
 void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net);
 
-int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net);
+int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int selfClient_fd, int client_fds[100]);
