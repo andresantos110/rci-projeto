@@ -82,8 +82,6 @@ int main(int argc, char **argv)
             token = strtok(NULL, " ");
         }
 
-        memset(input, 0, sizeof(input));
-
         command = word_array[0];
 
         if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
@@ -187,7 +185,13 @@ int main(int argc, char **argv)
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
             if(errcode != 0) return -1;
 
-            if(strcmp(buffer, "OKREG") == 0) tcpSelect(nodo, regIP, regUDP, arg1);
+            if(strcmp(nodo->ext, nodo->id) == 0) printf("First node to join.\n");
+            else printf("Connecting to node %s with IP %s and port %s\n", nodo->ext, nodo->ipExt, nodo->portExt);
+            if(strcmp(buffer, "OKREG") == 0)
+            {
+                printf("Joining network %s...\n", arg1);
+                tcpSelect(nodo, regIP, regUDP, arg1);
+            }
             else
             {
                 printf("UDP Error.");

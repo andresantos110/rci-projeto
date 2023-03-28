@@ -485,7 +485,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
     }
     else //caso exista comunicacao, return 2.
     {
-        printf("RECEBIDO: %s\n", buffer);
+        //printf("RECEBIDO: %s\n", buffer);
         /*verificar o que recebeu
             new
             extern
@@ -542,7 +542,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 for (k = 0; k < 32; k++)
                 {
 
-                    if(k == nodo->ncontents)
+                    if(k == 31)
                     {
                         snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", nodo->id, arg1, arg2);
                         send(fd, message, strlen(message), 0);
@@ -601,7 +601,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             }
             flg = 0;
 
-            printf(" o meu mangalho tem o numero %s\n", nodo->intr[fd]);
+            printf("Tabela 2 item é %s\n", nodo->intr[fd]);
 
             printf("%s   %s\n",nodo->table1[0], nodo->table2[0]);
             printf("%s   %s\n",nodo->table1[1], nodo->table2[1]);
