@@ -57,7 +57,7 @@
 1679309296 /home/andre/Documents/GitHub/rci-projeto/testeCB/udp.h
 	<arpa/inet.h>
 
-1679942904 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/cot.c
+1679947771 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/cot.c
 	"cot.h"
 	"udp.h"
 	"select.h"
@@ -71,7 +71,7 @@
 
 1679860334 /home/andre/Documents/GitHub/rci-projeto/testeCB/aux.h
 
-1679942105 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/select.c
+1679947804 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/select.c
 	"cot.h"
 	"select.h"
 	"udp.h"

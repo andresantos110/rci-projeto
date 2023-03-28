@@ -8,15 +8,15 @@
 #include <time.h>
 
 struct node{
-    char *id;
+    char id[3];
     char ip[16];
     char port[6];
     
-    char *ext;
+    char ext[3];
     char ipExt[16];
     char portExt[6];
 
-    char *bck;
+    char bck[3];
     char ipBck[16];
     char portBck[6];
 

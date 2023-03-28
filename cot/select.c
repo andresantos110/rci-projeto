@@ -108,6 +108,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
         {
             if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo - nao esta a entrar?
             {
+                FD_CLR(selfClient_fd, &read_fds);
                 if(commTCP(selfClient_fd, nodo, regIP, regUDP, net) == 1) //externo saiu, enviar a novo externo NEW
                 {
                     if(strcmp(nodo->bck, nodo->id) == 0)  //se for ancora e sair externo, tem de promover interno caso seja possivel
@@ -117,6 +118,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                             strcpy(nodo->ext, nodo->id);
                             strcpy(nodo->ipExt, nodo->ip);
                             strcpy(nodo->portExt, nodo->port);
+                            close(selfClient_fd);
+                            fn = 1;
                         }
                         else
                         {
@@ -133,6 +136,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                     memset(message, 0, sizeof(message));
                                     snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
                                     send(i, message, sizeof(message), 0);
+                                    close(selfClient_fd);
+                                    fn = 1;
                                     break;
                                 }
                             } 
@@ -161,7 +166,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 }
                 //read 0 aqui é saida de externo sempre
                 //connect e send para o backup
-                FD_CLR(selfClient_fd, &read_fds);
             }
         }
 
@@ -171,6 +175,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
             if (FD_ISSET(fds, &read_fds))
             {
+                FD_CLR(fds, &read_fds);
                 errcode = commTCP(fds, nodo, regIP, regUDP, net);
                 if(errcode == 0) // saida de interno
                 {
@@ -213,10 +218,9 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
                 else printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
                 //remover else, para teste apenas
-                FD_CLR(fds, &read_fds);
 
                 //if(num_clients == 0) max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
-                if(num_clients == 0) max_fd = max(server_fd, STDIN_FILENO);
+                if(num_clients == 0) max_fd = max3(server_fd, STDIN_FILENO, selfClient_fd);
             }
         }
 

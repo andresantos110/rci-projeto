@@ -28,3 +28,29 @@ int max3(int a, int b, int c)
     if(c > max) max = c;
     return max;
 }
+
+int initNode(struct node *nodo)
+{
+    int i;
+
+    memset(nodo->id, 0, sizeof(nodo->id));
+    memset(nodo->ip, 0, sizeof(nodo->ip));
+    memset(nodo->port, 0, sizeof(nodo->port));
+
+    memset(nodo->bck, 0, sizeof(nodo->bck));
+    memset(nodo->ipBck, 0, sizeof(nodo->ipBck));
+    memset(nodo->portBck, 0, sizeof(nodo->portBck));
+
+    memset(nodo->ext, 0, sizeof(nodo->ext));
+    memset(nodo->ipExt, 0, sizeof(nodo->ipExt));
+    memset(nodo->portExt, 0, sizeof(nodo->portExt));
+
+    for(i = 0; i < 100; i++)
+    {
+        memset(nodo->intr[i], 0, sizeof(nodo->intr[i]));
+        memset(nodo->ipIntr[i], 0, sizeof(nodo->ipIntr[i]));
+        memset(nodo->portIntr[i], 0, sizeof(nodo->portIntr[i]));
+    }
+    return 0;
+
+}

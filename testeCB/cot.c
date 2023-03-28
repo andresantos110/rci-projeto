@@ -137,6 +137,7 @@ int main(int argc, char **argv)
                     if(strcmp(line, "\0") == 0)
                     {
                         printf("Node does not exist. Try again.\n");
+                        sscanf("ERROR", "%s", input);
                     }
 
                 }

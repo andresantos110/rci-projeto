@@ -8,16 +8,15 @@ int main(int argc, char **argv)
     char regIP[16], regUDP[6];
     char buffer[1024+1];
     char message[128+1] = "NODES ";
-    char input[128];
+    char input[128], extInput[3];
     char line[32];
     char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
     int errcode, i;
     int nNodes = 0;
     struct node *nodo = (struct node*) malloc (sizeof(struct node));
 
-    nodo->id = calloc(2, sizeof(char));
-    nodo->ext = calloc(2, sizeof(char));
-    nodo->bck = calloc(2, sizeof(char));
+    initNode(nodo);
+
     nodo->ncontents = 0;
 
     srand(time(0));
@@ -130,8 +129,8 @@ int main(int argc, char **argv)
                 while(strlen(input) != 3)
                 {
                     printf("Select the node to connect to:\n");
-                    fgets(input, sizeof(input), stdin);
-                    sscanf(input, "%s", nodo->ext);
+                    fgets(extInput, sizeof(extInput), stdin);
+                    strcpy(&nodo->ext, extInput); //write invalido, fix in progress
                     if(strlen(input) != 3) printf("Please enter two characters.\n");
                     findNode(buffer, line, nNodes, nodo->ext);
                     if(strcmp(line, "\0") == 0)
@@ -202,9 +201,6 @@ int main(int argc, char **argv)
         else if(strcmp(command, "get") == 0) printf("Not yet on the network.\n");
         else if(strcmp(command, "exit") == 0)
         {
-            free(nodo->id);
-            free(nodo->ext);
-            free(nodo->bck);
             free(nodo);
             return 0;
             //free memoria conteudos?

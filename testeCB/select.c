@@ -57,9 +57,10 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
     //max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
 
-    max_fd = max3(server_fd, STDIN_FILENO, selfClient_fd);
-    //max_fd = max(server_fd, STDIN_FILENO);
-    //if(selfClient_fd > max_fd) max_fd = selfClient_fd;
+    //max_fd = max3(server_fd, STDIN_FILENO, selfClient_fd);
+
+    max_fd = max(server_fd, STDIN_FILENO);
+    if(selfClient_fd > max_fd) max_fd = selfClient_fd;
 
     while(1)
     {
@@ -261,7 +262,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 }
                 memset(message,0,sizeof(message));
                 memset(buffer,0,sizeof(buffer));
-                return;
+                printf("Left the network, exiting...");
+                exit(0);
             }
 
             else if(strcmp(command, "st") == 0)
@@ -375,11 +377,11 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net) //f
         {
             if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
             {
-                memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
+               /* memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
                 snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->intr[i]);
                 commUDP(message, auxBuffer, regIP, regUDP);
                 if(strcmp(auxBuffer, "OKUNREG") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->intr[i]);
-
+*/
 
                 strcpy(nodo->intr[i], "\0");
                 strcpy(nodo->ipIntr[i], "\0");
@@ -390,18 +392,19 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net) //f
 
 	    if(strcmp(nodo->bck, nodo->id) == 0) //verificar se é ancora - sabe-se que nao saiu interno logo saiu a outra ancora(ext)
         {
-            memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
+            /*memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
             snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->ext);
             commUDP(message, auxBuffer, regIP, regUDP);
-            if(strcmp(auxBuffer, "OKUNREG") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->ext);
+            if(strcmp(auxBuffer, "OKUNREG") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->ext);*/
             return 1;
         }
         else //se nao for ancora, apenas saiu um externo
         {
-            memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
+            //verificar se nó está registado
+            /*memset(message, 0, sizeof(message)); //avisar servidor que nó vizinho caiu
             snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->ext);
             commUDP(message, auxBuffer, regIP, regUDP);
-            if(strcmp(auxBuffer, "OKUNREG") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->ext);
+            if(strcmp(auxBuffer, "OKUNREG") != 0) printf("Node %s left with no warning. Sent message to server.\n", nodo->ext);*/
             strcpy(nodo->ext, nodo->bck);
             strcpy(nodo->ipExt, nodo->ipBck);
             strcpy(nodo->portExt, nodo->portBck);
