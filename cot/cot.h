@@ -10,7 +10,7 @@
 #define COLS 2
 
 struct node{
-    char id[3];
+    char id[4];
     char ip[16];
     char port[6];
 

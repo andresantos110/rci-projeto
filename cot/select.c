@@ -19,7 +19,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     memset(input, 0, sizeof(input));
     memset(message, 0, sizeof(message));
 
-    char *command, *arg1, *arg2, *arg3, *arg4, *arg5;
+    char *command, *arg1, *arg2;
 
     struct sockaddr_in server_addr, client_addr, external_addr;
     socklen_t client_addrlen = sizeof(client_addr);
@@ -268,6 +268,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 }
                 memset(message,0,sizeof(message));
                 memset(buffer,0,sizeof(buffer));
+                free(nodo);
                 printf("Left the network, exiting...");
                 exit(0);
             }
@@ -333,7 +334,11 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             {
                 printf("Are you sure you want to exit without leaving the network? (y/n)\n");
                 fgets(input, sizeof(input), stdin);
-                if(strcmp(input, "y") == 0) exit(0);
+                if(strcmp(input, "y") == 0)
+                {
+                    free(nodo);
+                    exit(0);
+                }
                 else printf("Resuming...\n");
             }
 
