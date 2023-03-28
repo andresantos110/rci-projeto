@@ -22,10 +22,10 @@ int main(int argc, char **argv)
     srand(time(0));
 
     if(argc != 5 && argc != 3) exit(1); //inicializacao dos valores dados como argumento
-    if(argc == 3) 
+    if(argc == 3)
     {
        strcpy (regIP, "193.136.138.142");
-       strcpy (regUDP, "59000"); 
+       strcpy (regUDP, "59000");
     }
     if(argc == 5)
     {
@@ -62,9 +62,9 @@ int main(int argc, char **argv)
         printf("Enter a command: \n");
         fgets(input, sizeof(input), stdin);
 
-        input[strcspn(input, "\n")] = '\0'; 
+        input[strcspn(input, "\n")] = '\0';
 
-        char word_array[6][128]; 
+        char word_array[6][128];
         int word_count = 0;
 
         char *token = strtok(input, " ");
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
                 strcpy(nodo->bck, arg2);
                 strcpy(nodo->ipExt, "\0");
                 strcpy(nodo->portExt, "\0");
-            }     
+            }
             else
             {
                 findNode(buffer, line, nNodes, arg2);

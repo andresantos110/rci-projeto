@@ -54,3 +54,38 @@ int initNode(struct node *nodo)
     return 0;
 
 }
+
+
+void updateTable(char arg2[], char ola[], char table1[ROWS][COLS], char table2[ROWS][COLS], int ntabela)
+{
+
+    int flag = 0;
+
+    if(ntabela == 100) printf("Table Full\n");
+
+    for (int i = 0; i < 100; i++)
+    {
+        if(strcmp(table1[i], arg2) == 0 && strcmp(table2[i], ola) == 0)
+        {
+            flag = 1;
+            break;
+        }
+        else
+        {
+            flag = 0;
+        }
+     }
+     if(flag == 0)
+     {
+        for (int i = 0; i < 100; i++)
+         {
+            if(strcmp(table1[i], "") == 0 && strcmp(table2[i], "") == 0)
+            {
+                strcpy(table1[i], arg2);
+                strcpy(table2[i], ola);
+                ntabela++;
+                break;
+            }
+        }
+     }
+}

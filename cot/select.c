@@ -11,6 +11,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     int i, j, fds;
     int fn = 0; //indicador primeiro nó
     int errcode;
+    int nNodes = 0;
+    char line[32];
     char buffer[1024+1], input[128+1], message[128+1];
 
     memset(buffer, 0, sizeof(buffer));
@@ -140,7 +142,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                     fn = 1;
                                     break;
                                 }
-                            } 
+                            }
                         }
 
                     }
@@ -334,17 +336,77 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 if(strcmp(input, "y") == 0) exit(0);
                 else printf("Resuming...\n");
             }
+
+            else if(strcmp(command, "get") == 0)
+            {
+                int k=0;
+                arg1 = word_array[1];
+                arg2 = word_array[2];
+
+                memset(message,0,sizeof(message));
+                memset(buffer,0,sizeof(buffer));
+
+                snprintf(message, sizeof(message), "%s %s", "NODES", "869");
+
+                if(strncmp(message, "NODES", 5) != 0) printf("Erro");
+                if(commUDP(message, buffer, regIP, regUDP) != 0) printf("Erro");
+
+                for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
+                nNodes--;
+
+                findNode(buffer, line, nNodes, arg1);
+
+                if(strcmp(line, "\0") == 0)
+                {
+                    printf("Node %s not found in network.\n", arg1);
+                }
+                if(strcmp(arg1, nodo->id) == 0)
+                {
+                    for (k = 0; k < 32; k++)
+                    {
+                        if(nodo->ncontents == 0)
+                        {
+                            printf("Content list empty.\n");
+                            break;
+                        }
+                        if(k == nodo->ncontents)
+                        {
+                            printf("File not found.\n");
+                            break;
+                        }
+                        if(strcmp(nodo->content[k], arg2) == 0)
+                        {
+                            printf("File found.\n");
+                            break;
+                        }
+                    }
+
+                }
+                else
+                {
+                    memset(message,0,sizeof(message));
+                    snprintf(message, sizeof(message), "%s %s %s %s", "QUERY", arg1, nodo->id, arg2);
+
+                    if(selfClient_fd > 0)
+                    {
+                        send(selfClient_fd, message, strlen(message), 0);
+                    }
+                    for (int l = 0; l < 100; l++)
+                    {
+                        if(client_fds[l] != -1)
+                        {
+                            send(client_fds[l], message, strlen(message), 0);
+                        }
+                    }
+                }
+            }
+
             else printf("Command not recognized.\n");
 
             FD_CLR(STDIN_FILENO, &read_fds);
 
-
         }
     }
-
-
-
-
 }
 
 
@@ -358,7 +420,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net) //f
     char auxBuffer[1024+1];
     char message[1024+1];
     char command[16], arg1[32], arg2[32], arg3[32];
-    int i = 0;
+    int i = 0, k = 0 ;
 
     //if(read(fd, buffer, 1024) == 0) return 0;
     //else return 1;
@@ -455,6 +517,128 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net) //f
             strcpy(nodo->bck, arg1);
             strcpy(nodo->ipBck, arg2);
             strcpy(nodo->portBck, arg3);
+        }
+
+        if(strstr(buffer, "QUERY") != NULL)
+        {
+            printf("recebi um ola\n");
+
+            sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
+
+            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
+
+            if(strcmp(arg1, nodo->id) == 0)
+            {
+                for (k = 0; k < 32; k++)
+                {
+                    if(nodo->ncontents == 0)
+                    {
+                        snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", nodo->id, arg1, arg2);
+                        send(fd, message, strlen(message), 0);
+                        break;
+                    }
+                    if(k == nodo->ncontents)
+                    {
+                        snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", nodo->id, arg1, arg2);
+                        send(fd, message, strlen(message), 0);
+                        break;
+                    }
+                    if(strcmp(nodo->content[k], arg2) == 0)
+                    {
+                        snprintf(message, sizeof(message), "%s %s %s %s", "CONTENT", nodo->id, arg1, arg2);
+                        send(fd, message, strlen(message), 0);
+                        break;
+                    }
+                }
+            }
+
+            /*else
+            {
+                snprintf(message, sizeof(message), "%s %s %s %s", "QUERY", arg1, arg2, arg3);
+
+                for (int i = 0; i < 100; i++)
+                {
+                    if(strcmp(nodo->intr[i], "\0") != 0 && strcmp(nodo->intr[i], nodo->intr[fd]) != 0)
+                    {
+                        send(i, message, strlen(message), 0);
+                    }
+                }
+            }*/
+            printf(" o meu mangalho tem o numero %s\n", nodo->intr[fd]); // QUERO QUE SEJA O NO QUE COMUNICA COMIGO
+
+            printf("%s   %s\n",nodo->table1[0], nodo->table2[0]);
+            printf("%s   %s\n",nodo->table1[1], nodo->table2[1]);
+        }
+
+        if(strstr(buffer, "CONTENT") != NULL)
+        {
+
+            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
+
+            sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
+
+            if(strcmp(arg1, nodo->id) == 0)
+            {
+                printf("Encontrei o ficheiro");
+            }
+            else
+            {
+                snprintf(message, sizeof(message), "%s %s %s %s", "CONTENT", arg1, arg2, arg3);
+                send(fd, message, strlen(message), 0);
+            }
+        }
+
+        if(strstr(buffer, "NOCONTENT") != NULL)
+        {
+
+            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
+
+            sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
+
+            if(strcmp(arg1, nodo->id) == 0)
+            {
+                printf("Não encontrei o ficheiro");
+            }
+            else
+            {
+                snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", arg1, arg2, arg3);
+                for (int i = 0; i < 100; i++)
+                {
+                    if(strcmp(nodo->intr[i], "\0") != 0 && strcmp(nodo->intr[i], nodo->intr[fd]) != 0)
+                    {
+                        send(fd, message, strlen(message), 0);
+                        break;
+                    }
+                }
+            }
+        }
+        if(strstr(buffer, "WITHDRAW") != NULL)
+        {
+            sscanf(buffer, "%s %s", command, arg1);
+            /*for (int i = 0; i < 100; i++)
+            {
+                if(strcmp(nodo->table1[i], arg1) == 0)
+                {
+                    strcpy(nodo->table1[i], "\0");
+                    strcpy(nodo->table2[i], "\0");
+                    break;
+                }
+                else
+                {
+                    break;
+                }
+            }*/
+
+            //enviar withdraw para outros nos
+            /*snprintf(message, sizeof(message), "%s %s", "WITHDRAW", arg1);
+            for (int i = 0; i < 100; i++)
+            {
+                if(strcmp(nodo->intr[i], "\0") != 0 && strcmp(nodo->intr[i], nodo->intr[fd]) != 0)
+                {
+                    send(fd, message, strlen(message), 0);
+                    break;
+                }
+            }*/
         }
         return 2;
     }
