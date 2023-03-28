@@ -35,5 +35,11 @@ o que acontece no timeout?
 
 ports errados?
 
+
+TODO:
+
 quando nó sai, tira os outros - funcao para remover caso nao avise BUG SAI TUDO 
 
+COMMTPC NOVO FICHEIRO
+
+WITHDRAW
