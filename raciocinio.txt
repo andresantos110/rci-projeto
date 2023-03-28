@@ -35,6 +35,10 @@ o que acontece no timeout?
 
 ports errados?
 
-quando nó sai, tira os outros
+quando nó sai, tira os outros - funcao para remover caso nao avise
 
 rede cai passado algum tempo???
+
+limpar buffer internos
+
+se no 1 sair, no 2 promove no 3 a ancora mas quando entra 4 a ligar a 2 promove a ancora
