@@ -124,10 +124,10 @@
 	"udp.h"
 	"aux.h"
 
-1680085900 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/aux.c
+1680099570 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/aux.c
 	"cot.h"
 
-1680085900 /home/milocas/Documents/GitHub/rci-projeto/testeCB/cot.h
+1680099570 /home/milocas/Documents/GitHub/rci-projeto/testeCB/cot.h
 	<stdio.h>
 	<stdlib.h>
 	<sys/types.h>
@@ -137,39 +137,39 @@
 	<unistd.h>
 	<time.h>
 
-1680098992 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/commTCP.c
+1680099570 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/commTCP.c
 	"cot.h"
 	"select.h"
 	"udp.h"
 	"aux.h"
 
-1680074948 /home/milocas/Documents/GitHub/rci-projeto/testeCB/select.h
+1680099570 /home/milocas/Documents/GitHub/rci-projeto/testeCB/select.h
 	<errno.h>
 	<netinet/in.h>
 	<sys/time.h>
 	<arpa/inet.h>
 
-1678996176 /home/milocas/Documents/GitHub/rci-projeto/testeCB/udp.h
+1680099570 /home/milocas/Documents/GitHub/rci-projeto/testeCB/udp.h
 	<arpa/inet.h>
 
-1679990028 /home/milocas/Documents/GitHub/rci-projeto/testeCB/aux.h
+1680099570 /home/milocas/Documents/GitHub/rci-projeto/testeCB/aux.h
 
-1680085900 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/cot.c
+1680099570 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/cot.c
 	"cot.h"
 	"udp.h"
 	"select.h"
 	"aux.h"
 
-1680035252 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/udp.c
+1680099570 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/udp.c
 	"cot.h"
 	"udp.h"
 
-1680098384 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/select.c
+1680099684 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/select.c
 	"cot.h"
 	"select.h"
 	"udp.h"
 	"aux.h"
 	"commTCP.h"
 
-1680074948 /home/milocas/Documents/GitHub/rci-projeto/testeCB/commTCP.h
+1680099570 /home/milocas/Documents/GitHub/rci-projeto/testeCB/commTCP.h
 

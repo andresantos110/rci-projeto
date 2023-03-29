@@ -391,8 +391,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                     memset(message,0,sizeof(message));
                     memset(buffer,0,sizeof(buffer));
 
-                    snprintf(message, sizeof(message), "%s %s", "NODES", net); // MUDAR PARA O ID DA REDE
-
                     if(strcmp(arg1, nodo->id) == 0)
                     {
                         for (k = 0; k < 32; k++)
