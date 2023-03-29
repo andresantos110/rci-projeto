@@ -315,7 +315,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 else
                 {
                     arg1 = word_array[1];
-                    nodo->content[nodo->ncontents] = calloc(strlen(arg1)+1, sizeof(char));
                     strcpy(nodo->content[nodo->ncontents], arg1);
                     printf("Content %s added. Number of contents: %d.\n", nodo->content[nodo->ncontents], nodo->ncontents+1);
                     nodo->ncontents++;
@@ -333,7 +332,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                         if(strcmp(nodo->content[i], arg1) == 0)
                         {
                             strcpy(nodo->content[i], "\0");
-                            free(nodo->content[i]);
                             printf("Content %s deleted.\n", arg1);
                             nodo->ncontents--;
                             break;
@@ -349,9 +347,9 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 else
                 {
                     printf("List of contents:\n");
-                    for(i=0;i<nodo->ncontents;i++)
+                    for(i=0;i<32;i++)
                     {
-                        printf("%d. %s\n", i+1, nodo->content[i]);
+                        if(strcmp(nodo->content[i], "\0") != 0) printf("%d. %s\n", i+1, nodo->content[i]);
                     }
                 }
             }

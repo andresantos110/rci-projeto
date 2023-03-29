@@ -19,9 +19,22 @@ int main(int argc, char **argv)
     int word_count = 0;
     char *token;
 
-    initNode(nodo);
+    initNode(nodo); //memset a 0 de todos os vetores do nó - evitar lixo
 
     nodo->ncontents = 0;
+
+    for(i = 0; i < 32; i++)
+    {
+        strcpy(nodo->content[i], "\0");
+    }
+    for(i = 0; i < 100; i++)
+    {
+        strcpy(nodo->table1[i], "\0");
+    }
+    for(i = 0; i < 100; i++)
+    {
+        strcpy(nodo->table2[i], "\0");
+    }
 
     memset(buffer, 0, sizeof(buffer));
 
@@ -307,7 +320,6 @@ int main(int argc, char **argv)
             else
             {
                 arg1 = word_array[1];
-                nodo->content[nodo->ncontents] = calloc(strlen(arg1)+1, sizeof(char));
                 strcpy(nodo->content[nodo->ncontents], arg1);
                 printf("Content %s added. Number of contents: %d.\n", nodo->content[nodo->ncontents], nodo->ncontents+1);
                 nodo->ncontents++;
@@ -325,7 +337,6 @@ int main(int argc, char **argv)
                     if(strcmp(nodo->content[i], arg1) == 0)
                     {
                         strcpy(nodo->content[i], "\0");
-                        free(nodo->content[i]);
                         printf("Content %s deleted.\n", arg1);
                         nodo->ncontents--;
                         break;
@@ -341,9 +352,9 @@ int main(int argc, char **argv)
             else
             {
                 printf("List of contents:\n");
-                for(i=0;i<nodo->ncontents;i++)
+                for(i=0;i<32;i++)
                 {
-                    printf("%d. %s\n", i, nodo->content[i]);
+                    if(strcmp(nodo->content[i], "\0") != 0) printf("%d. %s\n", i+1, nodo->content[i]);
                 }
             }
         }

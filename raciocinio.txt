@@ -31,10 +31,6 @@ ordem:
 para saber a que fd corresponde cada nó, guarda em intr[fd] o id do nó
 
 
-o que acontece no timeout?
-
-ports errados?
-
 
 TODO:
 
@@ -50,3 +46,5 @@ duvidas:
 help?
 
 tirar outro no se ele nao acabar com \n ou se nao reconhecer mensagem?
+
+timeout no select
