@@ -36,6 +36,4 @@ TODO:
 
 WITHDRAW
 
-fechar ligacao se for malicioso
-
 timeout select
