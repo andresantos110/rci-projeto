@@ -13,7 +13,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
     char auxBuffer[1024+1];
     char message[1024+1];
     char command[16], arg1[32], arg2[32], arg3[32];
-    int i = 0, k = 0, u = 0, l = 0, flg = 0 , flg2 = 0;
+    int i = 0, k = 0, u = 0, l = 0, p = 0, flg = 0, flg2 = 0;
 
     //if(read(fd, buffer, 1024) == 0) return 0;
     //else return 1;
@@ -106,7 +106,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
             sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
 
-            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
+            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela); // MUDAR pode ser interno ou externo
 
             if(strcmp(arg1, nodo->id) == 0)
             {
@@ -144,7 +144,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
                 for (l = 0; l < 100; l++)
                 {
-                    if(nodo->table1[i] == arg2)
+                    if(nodo->table1[l] == arg2)
                     {
                         if(strcmp(nodo->ext, arg2) == 0){
                             send(selfClient_fd, message, strlen(message), 0);
@@ -170,11 +170,11 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                     {
                         send(selfClient_fd, message, strlen(message), 0);
                     }
-                    for (int l = 0; l < 100; l++)
+                    for (p = 0; p < 100; p++)
                     {
-                        if(client_fds[l] != -1)
+                        if(client_fds[p] != -1)
                         {
-                            send(client_fds[l], message, strlen(message), 0);
+                            send(client_fds[p], message, strlen(message), 0);
                             break;
                         }
                     }
@@ -182,7 +182,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             }
             flg = 0;
 
-            printf("Tabela 2 item é %s\n", nodo->intr[fd]);
+            printf("Tabela 2 item é %s\n", nodo->intr[fd]); // MUDAR pode ser interno ou externo
 
             printf("%s   %s\n",nodo->table1[0], nodo->table2[0]);
             printf("%s   %s\n",nodo->table1[1], nodo->table2[1]);
@@ -192,9 +192,9 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
         if(strstr(buffer, "CONTENT") != NULL)
         {
 
-            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
+            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela); // MUDAR pode ser interno ou externo
 
-            /*sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
+            sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
 
             if(strcmp(arg1, nodo->id) == 0)
             {
@@ -203,40 +203,99 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             else
             {
                 snprintf(message, sizeof(message), "%s %s %s %s", "CONTENT", arg1, arg2, arg3);
-                send(fd, message, strlen(message), 0);
-            }*/
+                // função WHO THE BITCH
+                for (l = 0; l < 100; l++)
+                {
+                    if(nodo->table1[l] == arg1)
+                    {
+                        if(strcmp(nodo->ext, arg1) == 0){
+                            send(selfClient_fd, message, strlen(message), 0);
+                            flg = 1;
+                        }
+                        else
+                        {
+                            for (u = 0; u < 100; u++)
+                            {
+                                if(u == atoi(arg1))
+                                {
+                                    send(client_fds[u], message, strlen(message), 0); //send message to fd of table2[i]
+                                    flg = 1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if(flg == 0){
+                    if(selfClient_fd > 0)
+                    {
+                        send(selfClient_fd, message, strlen(message), 0);
+                    }
+                    for (p = 0; p < 100; p++)
+                    {
+                        if(client_fds[p] != -1)
+                        {
+                            send(client_fds[p], message, strlen(message), 0);
+                            break;
+                        }
+                    }
+                }
+            }
             memset(buffer,0,sizeof(buffer));
         }
 
         if(strstr(buffer, "NOCONTENT") != NULL)
         {
 
-            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
+            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela); // MUDAR pode ser interno ou externo
 
             sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
 
-            /*if(strcmp(arg1, nodo->id) == 0)
+            if(strcmp(arg1, nodo->id) == 0)
             {
                 printf("Não encontrei o ficheiro\n");
             }
             else
             {
-                snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", arg1, arg2, arg3);
-                send(fd, message, strlen(message), 0);
-            }*/
-            // NAO ATIVAR
-            /*else
-            {
-                snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", arg1, arg2, arg3);
-                for (int i = 0; i < 100; i++)
+                for (l = 0; l < 100; l++)
                 {
-                    if(strcmp(nodo->intr[i], "\0") != 0 && strcmp(nodo->intr[i], nodo->intr[fd]) != 0)
+                    if(nodo->table1[l] == arg1)
                     {
-                        send(fd, message, strlen(message), 0);
-                        break;
+                        if(strcmp(nodo->ext, arg1) == 0){
+                            send(selfClient_fd, message, strlen(message), 0);
+                            flg = 1;
+                        }
+                        else
+                        {
+                            for (u = 0; u < 100; u++)
+                            {
+                                if(u == atoi(arg1))
+                                {
+                                    send(client_fds[u], message, strlen(message), 0); //send message to fd of table2[i]
+                                    flg = 1;
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
-            }*/
+
+                if(flg == 0){
+                    if(selfClient_fd > 0)
+                    {
+                        send(selfClient_fd, message, strlen(message), 0);
+                    }
+                    for (p = 0; p < 100; p++)
+                    {
+                        if(client_fds[p] != -1)
+                        {
+                            send(client_fds[p], message, strlen(message), 0);
+                            break;
+                        }
+                    }
+                }
+            }
             memset(buffer,0,sizeof(buffer));
         }
         if(strstr(buffer, "WITHDRAW") != NULL)
