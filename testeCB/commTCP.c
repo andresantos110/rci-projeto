@@ -110,6 +110,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 {
                     if(nodo->ncontents == 0)
                     {
+                        printf("NOCONTENT sent\n");
                         snprintf(message, sizeof(message), "%s %s %s %s%s", "NOCONTENT",  arg2, nodo->id, arg3, "\n");
                         send(fd, message, strlen(message), 0);
                         flg2 = 1;
@@ -122,6 +123,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                             {
                                 if(strcmp(arg3, nodo->content[k]) == 0)
                                 {
+                                    printf("CONTENT sent\n");
                                     snprintf(message, sizeof(message), "%s %s %s %s%s", "CONTENT",  arg2, nodo->id, arg3, "\n");
                                     send(fd, message, strlen(message), 0);
                                     flg2 = 2;
@@ -133,6 +135,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                     }
                     if(flg2 == 0)
                     {
+                        printf("NOCONTENT sent\n");
                         snprintf(message, sizeof(message), "%s %s %s %s%s", "NOCONTENT",  arg2, nodo->id, arg3, "\n");
                         send(fd, message, strlen(message), 0);
                     }

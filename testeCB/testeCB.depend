@@ -124,7 +124,7 @@
 	"udp.h"
 	"aux.h"
 
-1680099570 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/aux.c
+1680121928 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/aux.c
 	"cot.h"
 
 1680099570 /home/milocas/Documents/GitHub/rci-projeto/testeCB/cot.h
@@ -137,7 +137,7 @@
 	<unistd.h>
 	<time.h>
 
-1680112930 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/commTCP.c
+1680120062 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/commTCP.c
 	"cot.h"
 	"select.h"
 	"udp.h"
@@ -152,7 +152,7 @@
 1680099570 /home/milocas/Documents/GitHub/rci-projeto/testeCB/udp.h
 	<arpa/inet.h>
 
-1680099570 /home/milocas/Documents/GitHub/rci-projeto/testeCB/aux.h
+1680121928 /home/milocas/Documents/GitHub/rci-projeto/testeCB/aux.h
 
 1680099570 source:/home/milocas/Documents/GitHub/rci-projeto/testeCB/cot.c
 	"cot.h"
