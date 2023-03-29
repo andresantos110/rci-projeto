@@ -44,10 +44,9 @@ WITHDRAW
 
 TIRAR OUTRO DA REDE SE NAO RECONHECER
 
-METER \nS mensagens
 
-mensagem para user no servidor quando recebe ligacao - estao a dar print depois?
+duvidas:
 
-meter NO INTERNS quando nao ha internos
+help?
 
-cuidado com seg faults a ler comando dentro do select
+tirar outro no se ele nao acabar com \n ou se nao reconhecer mensagem?

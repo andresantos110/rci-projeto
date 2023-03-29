@@ -16,6 +16,10 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     char line[32];
     char buffer[1024+1], input[128+1], message[128+1];
 
+    char word_array[6][128];
+    int word_count = 0;
+    char *token;
+
     memset(buffer, 0, sizeof(buffer));
     memset(input, 0, sizeof(input));
     memset(message, 0, sizeof(message));
@@ -44,7 +48,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
         external_addr.sin_addr.s_addr = inet_addr(nodo->ipExt); //IP DO EXTERNO
         external_addr.sin_port = htons(atoi(nodo->portExt)); //PORTA DO EXTERNO
         if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
-        snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
+        snprintf(message, sizeof(message), "%s %s %s %s%s", "NEW", nodo->id, nodo->ip, nodo->port, "\n");
         send(selfClient_fd, message , strlen(message) , 0 );
         fn = 0;
     }
@@ -96,9 +100,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             client_fd = accept(server_fd, (struct sockaddr*)&client_addr, & client_addrlen);
             if(client_fd == -1) exit(1);
 
-            printf("New connection , socket fd is %d , ip is : %s , port : %d\n" , client_fd, inet_ntoa(client_addr.sin_addr) , ntohs
-                  (client_addr.sin_port));
-
             for (int i = 0; i < 100; i++)
             {
                 if (client_fds[i] == -1)
@@ -139,7 +140,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                     memset(nodo->portIntr[i], 0, sizeof(nodo->portIntr[i]));
                                     memset(nodo->intr[i], 0, sizeof(nodo->intr[i]));
                                     memset(message, 0, sizeof(message));
-                                    snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
+                                    snprintf(message, sizeof(message), "%s %s %s %s%s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt, "\n");
                                     send(i, message, sizeof(message), 0);
                                     close(selfClient_fd);
                                     fn = 1;
@@ -164,13 +165,11 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                         external_addr.sin_port = htons(atoi(nodo->portExt)); //PORTA DO EXTERNO
                         if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
                         memset(message, 0, sizeof(message));
-                        snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
+                        snprintf(message, sizeof(message), "%s %s %s %s%s", "NEW", nodo->id, nodo->ip, nodo->port,"\n");
                         send(selfClient_fd, message , strlen(message) , 0 );
                         if(selfClient_fd > max_fd) max_fd = selfClient_fd;
                     }
                 }
-                //read 0 aqui é saida de externo sempre
-                //connect e send para o backup
             }
         }
 
@@ -212,7 +211,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                 memset(nodo->portIntr[j], 0, sizeof(nodo->intr[j]));
                                 memset(nodo->intr[j], 0, sizeof(nodo->intr[j]));
                                 memset(message, 0, sizeof(message));
-                                snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
+                                snprintf(message, sizeof(message), "%s %s %s %s%s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt,"\n");
                                 send(j, message, sizeof(message), 0);
                                 break;
                             }
@@ -231,18 +230,28 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
         {
             fgets(input, sizeof(input), stdin);
 
-            input[strcspn(input, "\n")] = 0;
-
-            char *word_array[6];
-            int word_count = 0;
-
-            char *token = strtok(input, " ");
-            while (token != NULL && word_count < 20) {
-                word_array[word_count++] = token;
-                token = strtok(NULL, " ");
+            if(strcmp(input, "\n") == 0)
+            {
+                command = input;
+                memset(input, 0, sizeof(input));
             }
+            else
+            {
+                word_count = 0;
+                token = NULL;
+                input[strcspn(input, "\n")] = '\0';
 
-            command = word_array[0];
+                token = strtok(input, " ");
+                while (token != NULL && word_count < 20)
+                {
+                    strcpy(word_array[word_count++], token);
+                    token = strtok(NULL, " ");
+                }
+
+                command = word_array[0];
+
+                memset(input, 0, sizeof(input));
+            }
 
             if(strcmp(command, "join") == 0) printf("Error: Already joined.\n");
 
@@ -287,11 +296,17 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             {
                 printf("Node %s topology:\nExtern:\n%s %s %s\nBackup:\n%s %s %s\nIntern:\n", nodo->id,
                 nodo->ext, nodo->ipExt, nodo->portExt, nodo->bck, nodo->ipBck, nodo->portBck);
+                j=0;
                 for(i=0;i<100;i++)
                 {
-                    if(strcmp(nodo->intr[i], "\0") != 0) printf("%s %s %s\n",
-                    nodo->intr[i], nodo->ipIntr[i], nodo->portIntr[i]);
+                    if(strcmp(nodo->intr[i], "\0") != 0) 
+                    {
+                        printf("%s %s %s\n",
+                        nodo->intr[i], nodo->ipIntr[i], nodo->portIntr[i]);
+                        j++;
+                    }   
                 }
+                if(j == 0) printf("None\n");
             }
 
             else if(strcmp(command, "create") == 0)
@@ -413,7 +428,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 else
                 {
                     memset(message,0,sizeof(message));
-                    snprintf(message, sizeof(message), "%s %s %s %s", "QUERY", arg1, nodo->id, arg2);
+                    snprintf(message, sizeof(message), "%s %s %s %s%s", "QUERY", arg1, nodo->id, arg2,"\n");
 
                     if(selfClient_fd > 0)
                     {

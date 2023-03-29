@@ -15,6 +15,10 @@ int main(int argc, char **argv)
     int nNodes = 0;
     struct node *nodo = (struct node*) malloc (sizeof(struct node));
 
+    char word_array[6][128];
+    int word_count = 0;
+    char *token;
+
     initNode(nodo);
 
     nodo->ncontents = 0;
@@ -72,19 +76,28 @@ int main(int argc, char **argv)
     {
         fgets(input, sizeof(input), stdin);
 
-        input[strcspn(input, "\n")] = '\0';
-
-        char word_array[6][128];
-        int word_count = 0;
-
-        char *token = strtok(input, " ");
-        while (token != NULL && word_count < 20)
+        if(strcmp(input, "\n") == 0)
         {
-            strcpy(word_array[word_count++], token);
-            token = strtok(NULL, " ");
+            command = input;
+            memset(input, 0, sizeof(input));
         }
+        else
+        {
+            word_count = 0;
+            token = NULL;
+            input[strcspn(input, "\n")] = '\0';
 
-        command = word_array[0];
+            token = strtok(input, " ");
+            while (token != NULL && word_count < 20)
+            {
+                strcpy(word_array[word_count++], token);
+                token = strtok(NULL, " ");
+            }
+
+            command = word_array[0];
+
+            memset(input, 0, sizeof(input));
+        }
 
         if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
         {
@@ -340,7 +353,10 @@ int main(int argc, char **argv)
             printf("create - Create a new content\ndelete - Delete existing content\nsn - Show contents\n");
             printf("exit - Close application\nMore commands available after joining a network.\n");
         }
-        else printf("Command not recognized.\n");
+        else
+        {
+            printf("Command not recognized.\n");
+        }
     }
 
     free(nodo);

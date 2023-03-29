@@ -84,7 +84,7 @@ void updateTable(char arg2[], char ola[], char table1[ROWS][COLS], char table2[R
      {
         for (int i = 0; i < 100; i++)
          {
-            if(strcmp(table1[i], "") == 0 && strcmp(table2[i], "") == 0)
+            if(strcmp(table1[i], "\0") == 0 && strcmp(table2[i], "\0") == 0)
             {
                 strcpy(table1[i], arg2);
                 strcpy(table2[i], ola);
