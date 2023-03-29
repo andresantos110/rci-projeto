@@ -20,6 +20,10 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     int word_count = 0;
     char *token;
 
+    struct timeval tv;
+    tv.tv_sec = 5; //timeout de 5 segundos
+    tv.tv_usec = 0;
+
     memset(buffer, 0, sizeof(buffer));
     memset(input, 0, sizeof(input));
     memset(message, 0, sizeof(message));
@@ -90,7 +94,10 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
         }
 
 
-        if(select(max_fd +1, &read_fds, NULL, NULL, NULL) == -1) exit(1);
+        if(select(max_fd +1, &read_fds, NULL, NULL, &tv) < 0)
+        {
+            printf("Select timeout.\n");
+        }
 
         if(FD_ISSET(server_fd, &read_fds)) //ligacao ao servidor
         {
