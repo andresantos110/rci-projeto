@@ -313,12 +313,12 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 j=0;
                 for(i=0;i<100;i++)
                 {
-                    if(strcmp(nodo->intr[i], "\0") != 0) 
+                    if(strcmp(nodo->intr[i], "\0") != 0)
                     {
                         printf("%s %s %s\n",
                         nodo->intr[i], nodo->ipIntr[i], nodo->portIntr[i]);
                         j++;
-                    }   
+                    }
                 }
                 if(j == 0) printf("None\n");
             }
@@ -381,79 +381,85 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
             else if(strcmp(command, "get") == 0)
             {
-                if(word_count != 3 ) printf("Invalid Input.\n");
 
                 int k=0;
                 arg1 = word_array[1];
                 arg2 = word_array[2];
 
-                memset(message,0,sizeof(message));
-                memset(buffer,0,sizeof(buffer));
-
-                snprintf(message, sizeof(message), "%s %s", "NODES", "869"); // MUDAR PARA O ID DA REDE
-
-                if(strncmp(message, "NODES", 5) != 0) printf("Erro");
-                errcode = commUDP(message, buffer, regIP, regUDP);
-                if(errcode == 1)
-                {
-                    printf("UDP Error. Exiting");
-                    free(nodo);
-                    exit(1);
-                }
-                if(errcode == -1)
-                {
-                    printf("Could not communicate with node server.\n");
-                    exit(1);
-                }
-
-                for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
-                nNodes--;
-
-                findNode(buffer, line, nNodes, arg1);
-
-                if(strcmp(line, "\0") == 0)
-                {
-                    printf("Node %s not found in network.\n", arg1); // neste if eno proximo ele tem de aceitar o comando seguinte (ta a crashar)
-                }
-                if(strcmp(arg1, nodo->id) == 0)
-                {
-                    for (k = 0; k < 32; k++)
-                    {
-                        if(nodo->ncontents == 0)
-                        {
-                            printf("Content list empty.\n");
-                            break;
-                        }
-                        if(k == nodo->ncontents)
-                        {
-                            printf("File not found.\n");
-                            break;
-                        }
-                        if(strcmp(nodo->content[k], arg2) == 0)
-                        {
-                            printf("File found.\n");
-                            break;
-                        }
-                    }
-
-                }
+                if(word_count != 3 ) printf("Invalid Input.\n");
+                else if(atoi(arg1) == 0) printf("Invalid Input.\n");
                 else
                 {
                     memset(message,0,sizeof(message));
-                    snprintf(message, sizeof(message), "%s %s %s %s%s", "QUERY", arg1, nodo->id, arg2,"\n");
+                    memset(buffer,0,sizeof(buffer));
 
-                    if(selfClient_fd > 0)
+                    snprintf(message, sizeof(message), "%s %s", "NODES", net); // MUDAR PARA O ID DA REDE
+
+                    if(strncmp(message, "NODES", 5) != 0) printf("Erro");
+                    errcode = commUDP(message, buffer, regIP, regUDP);
+
+                    if(errcode == 1)
                     {
-                        send(selfClient_fd, message, strlen(message), 0);
+                        printf("UDP Error. Exiting");
+                        free(nodo);
+                        exit(1);
                     }
-                    for (int l = 0; l < 100; l++)
+                    if(errcode == -1)
                     {
-                        if(client_fds[l] != -1)
+                        printf("Could not communicate with node server.\n");
+                        exit(1);
+                    }
+
+                    for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
+                    nNodes--;
+
+                    findNode(buffer, line, nNodes, arg1);
+
+                    if(strcmp(line, "\0") == 0)
+                    {
+                        printf("Node %s not found in network.\n", arg1); // neste if eno proximo ele tem de aceitar o comando seguinte (ta a crashar)
+                    }
+                    if(strcmp(arg1, nodo->id) == 0)
+                    {
+                        for (k = 0; k < 32; k++)
                         {
-                            send(client_fds[l], message, strlen(message), 0);
+                            if(nodo->ncontents == 0)
+                            {
+                                printf("Content list empty.\n");
+                                break;
+                            }
+                            if(k == nodo->ncontents)
+                            {
+                                printf("File not found.\n");
+                                break;
+                            }
+                            if(strcmp(nodo->content[k], arg2) == 0)
+                            {
+                                printf("File found.\n");
+                                break;
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        memset(message,0,sizeof(message));
+                        snprintf(message, sizeof(message), "%s %s %s %s%s", "QUERY", arg1, nodo->id, arg2,"\n");
+
+                        if(selfClient_fd > 0)
+                        {
+                            send(selfClient_fd, message, strlen(message), 0);
+                        }
+                        for (int l = 0; l < 100; l++)
+                        {
+                            if(client_fds[l] != -1)
+                            {
+                                send(client_fds[l], message, strlen(message), 0);
+                            }
                         }
                     }
                 }
+
             }
             else if(strcmp(command, "help") == 0)
             {

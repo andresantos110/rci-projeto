@@ -12,8 +12,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     int i, j, fds;
     int fn = 0; //indicador primeiro nó
     int errcode = 0;
-    int nNodes = 0;
-    char line[32];
     char buffer[1024+1], input[128+1], message[128+1];
 
     char word_array[6][128];
@@ -395,30 +393,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
                     snprintf(message, sizeof(message), "%s %s", "NODES", net); // MUDAR PARA O ID DA REDE
 
-                    if(strncmp(message, "NODES", 5) != 0) printf("Erro");
-                    errcode = commUDP(message, buffer, regIP, regUDP);
-
-                    if(errcode == 1)
-                    {
-                        printf("UDP Error. Exiting");
-                        free(nodo);
-                        exit(1);
-                    }
-                    if(errcode == -1)
-                    {
-                        printf("Could not communicate with node server.\n");
-                        exit(1);
-                    }
-
-                    for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
-                    nNodes--;
-
-                    findNode(buffer, line, nNodes, arg1);
-
-                    if(strcmp(line, "\0") == 0)
-                    {
-                        printf("Node %s not found in network.\n", arg1); // neste if eno proximo ele tem de aceitar o comando seguinte (ta a crashar)
-                    }
                     if(strcmp(arg1, nodo->id) == 0)
                     {
                         for (k = 0; k < 32; k++)

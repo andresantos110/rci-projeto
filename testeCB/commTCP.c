@@ -253,7 +253,48 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                         }
                     }
                 }
+
                 memset(buffer,0,sizeof(buffer));
+            }
+            else if(strstr(buffer, "WITHDRAW") != NULL)
+            {
+
+                sscanf(buffer, "%s %s", command, arg1);
+
+                for (int i = 0; i < 100; i++)
+                {
+                    if(strcmp(nodo->table1[i], arg1) == 0)
+                    {
+                        memset(nodo->table1[i],0,strlen(nodo->table1[i]));
+                        memset(nodo->table2[i],0,strlen(nodo->table2[i]));
+                        break;
+                    }
+                }
+                for (k = 0; k < 100; k++)
+                {
+                    if(strcmp(nodo->table2[k], arg1) == 0)
+                    {
+                        memset(nodo->table1[k],0,strlen(nodo->table1[k]));
+                        memset(nodo->table2[k],0,strlen(nodo->table2[k]));
+                        break;
+                    }
+                }
+                if(strcmp(arg1, nodo->ext) == 0)
+                {
+                    send(selfClient_fd, buffer, strlen(buffer), 0);
+                }
+                else
+                {
+                    for(u = 0; u < 100; u++)
+                    {
+                        if(strcmp(arg1, nodo->intr[u]) == 0)
+                        {
+                            send(u, buffer, sizeof(buffer), 0);
+                        }
+                    }
+
+                }
+
             }
             else
             {
