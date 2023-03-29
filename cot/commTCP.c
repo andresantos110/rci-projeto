@@ -119,7 +119,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                     }
                     if(flg2 == 0)
                     {
-                        for (k = 0; k < 31; k++)
+                        for (k = 0; k < 32; k++)
                         {
                             if(nodo->content[k] != NULL){
                                 if(strcmp(arg3, nodo->content[k]) == 0)
@@ -143,50 +143,18 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 {
                     snprintf(message, sizeof(message), "%s %s %s %s%s", "QUERY", arg1, arg2, arg3, "\n");
 
-                    for (l = 0; l < 100; l++)
+                    for(u = 0; u < 100; u++)
                     {
-                        if(nodo->table1[l] == arg2)
-                        {
-                            if(strcmp(nodo->ext, arg2) == 0){
-                                send(selfClient_fd, message, strlen(message), 0);
-                                flg = 1;
-                            }
-                            else
-                            {
-                                for (u = 0; u < 100; u++)
-                                {
-                                    if(u == atoi(arg2))
-                                    {
-                                        send(client_fds[u], message, strlen(message), 0); //send message to fd of table2[i]
-                                        flg = 1;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                        if(client_fds[u] != fd && u > 0) send(client_fds[u], message, strlen(message), 0);
                     }
 
-                    if(flg == 0){
-                        if(selfClient_fd > 0)
-                        {
-                            send(selfClient_fd, message, strlen(message), 0);
-                        }
-                        for (p = 0; p < 100; p++)
-                        {
-                            if(client_fds[p] != -1)
-                            {
-                                send(client_fds[p], message, strlen(message), 0);
-                                break;
-                            }
-                        }
-                    }
+                    if(selfClient_fd > 0) send(selfClient_fd, message, strlen(message), 0);
                 }
-                flg = 0;
 
-                printf("Tabela 2 item é %s\n", nodo->intr[fd]); // MUDAR pode ser interno ou externo
+                //printf("Tabela 2 item é %s\n", nodo->intr[fd]); // MUDAR pode ser interno ou externo
 
-                printf("%s   %s\n",nodo->table1[0], nodo->table2[0]);
-                printf("%s   %s\n",nodo->table1[1], nodo->table2[1]);
+                //printf("%s   %s\n",nodo->table1[0], nodo->table2[0]);
+                //printf("%s   %s\n",nodo->table1[1], nodo->table2[1]);
                 memset(buffer,0,sizeof(buffer));
             }
 
