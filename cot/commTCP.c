@@ -34,10 +34,10 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
         for(i = 0;i < 100;i++) //verificar se saiu interno
         {
-            if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) return 0; //saiu um interno
+            if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) return 0;
         }
 
-		return 1;
+        return 1;
     }
     else //caso exista comunicacao, return 2.
     {
@@ -84,13 +84,28 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 strcpy(nodo->portBck, arg3);
                 memset(buffer,0,sizeof(buffer));
             }
+
             else if(strstr(buffer, "QUERY") != NULL)
             {
+                printf("recebi um ola\n");
                 flg2 = 0;
 
                 sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
 
-                updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela); // MUDAR pode ser interno ou externo
+                if(selfClient_fd == fd)
+                {
+                    updateTable(arg2, nodo->ext, nodo->table1, nodo->table2, nodo->ntabela);
+                }
+                else
+                {
+                    for(u = 0; u < 100; u++)
+                    {
+                        if(client_fds[u] == fd)
+                        {
+                            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
+                        }
+                    }
+                }
 
                 if(strcmp(arg1, nodo->id) == 0)
                 {
@@ -135,17 +150,25 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                     if(selfClient_fd > 0) send(selfClient_fd, message, strlen(message), 0);
                 }
 
-                //printf("Tabela 2 item é %s\n", nodo->intr[fd]); // MUDAR pode ser interno ou externo
-
-                //printf("%s   %s\n",nodo->table1[0], nodo->table2[0]);
-                //printf("%s   %s\n",nodo->table1[1], nodo->table2[1]);
                 memset(buffer,0,sizeof(buffer));
             }
 
             else if(strstr(buffer, "CONTENT") != NULL)
             {
-
-                updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela); // MUDAR pode ser interno ou externo
+                if(selfClient_fd == fd)
+                {
+                    updateTable(arg2, nodo->ext, nodo->table1, nodo->table2, nodo->ntabela);
+                }
+                else
+                {
+                    for(u = 0; u < 100; u++)
+                    {
+                        if(client_fds[u] == fd)
+                        {
+                            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
+                        }
+                    }
+                }
 
                 sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
 
@@ -166,11 +189,11 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                             }
                             else
                             {
-                                for(u = 0; u < 100; u++)
+                                for(k = 0; k < 100; k++)
                                 {
-                                    if(strcmp(nodo->table2[l], nodo->intr[u]) == 0)
+                                    if(strcmp(nodo->table2[l], nodo->intr[k]) == 0)
                                     {
-                                        send(u, buffer, sizeof(buffer), 0);
+                                        send(k, buffer, sizeof(buffer), 0);
                                     }
                                 }
 
@@ -184,7 +207,20 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             else if(strstr(buffer, "NOCONTENT") != NULL)
             {
 
-                updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
+                if(selfClient_fd == fd)
+                {
+                    updateTable(arg2, nodo->ext, nodo->table1, nodo->table2, nodo->ntabela);
+                }
+                else
+                {
+                    for(u = 0; u < 100; u++)
+                    {
+                        if(client_fds[u] == fd)
+                        {
+                            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
+                        }
+                    }
+                }
 
                 sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
 
