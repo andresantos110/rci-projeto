@@ -390,7 +390,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 memset(message,0,sizeof(message));
                 memset(buffer,0,sizeof(buffer));
 
-                snprintf(message, sizeof(message), "%s %s", "NODES", "869"); // MUDAR PARA O ID DA REDE
+                snprintf(message, sizeof(message), "%s %s", "NODES", net); // MUDAR PARA O ID DA REDE
 
                 if(strncmp(message, "NODES", 5) != 0) printf("Erro");
                 errcode = commUDP(message, buffer, regIP, regUDP);
