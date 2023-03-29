@@ -32,19 +32,10 @@ para saber a que fd corresponde cada nó, guarda em intr[fd] o id do nó
 
 
 
-TODO:
-
-quando nó sai, tira os outros - funcao para remover caso nao avise BUG SAI TUDO 
+TODO: 
 
 WITHDRAW
 
-TIRAR OUTRO DA REDE SE NAO RECONHECER
+fechar ligacao se for malicioso
 
-
-duvidas:
-
-help?
-
-tirar outro no se ele nao acabar com \n ou se nao reconhecer mensagem?
-
-timeout no select
+timeout select
