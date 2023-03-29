@@ -13,7 +13,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
     char auxBuffer[1024+1];
     char message[1024+1];
     char command[16], arg1[32], arg2[32], arg3[32];
-    int i = 0, k = 0, u = 0, l = 0, p = 0, flg = 0, flg2 = 0;
+    int i = 0, k = 0, u = 0, l = 0, flg2 = 0;
 
     //if(read(fd, buffer, 1024) == 0) return 0;
     //else return 1;
@@ -34,24 +34,10 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
         for(i = 0;i < 100;i++) //verificar se saiu interno
         {
-            if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
-            {
-                strcpy(nodo->intr[i], "\0");
-                strcpy(nodo->ipIntr[i], "\0");
-                strcpy(nodo->portIntr[i], "\0"); //limpar informacao do nó que saiu
-                return 0;
-            }
+            if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) return 0; //saiu um interno
         }
 
-		if(strcmp(nodo->bck, nodo->id) == 0) return 1;
-        else //se nao for ancora, apenas saiu um externo
-        {
-            strcpy(nodo->ext, nodo->bck);
-            strcpy(nodo->ipExt, nodo->ipBck);
-            strcpy(nodo->portExt, nodo->portBck);
-            return 1;
-        }
-        return -1;
+		return 1;
     }
     else //caso exista comunicacao, return 2.
     {
@@ -90,7 +76,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 }
                 memset(buffer,0,sizeof(buffer));
             }
-            if(strstr(buffer, "EXTERN") != NULL) //se for null
+            else if(strstr(buffer, "EXTERN") != NULL) //se for null
             {
                 sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
                 strcpy(nodo->bck, arg1);
@@ -98,11 +84,8 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 strcpy(nodo->portBck, arg3);
                 memset(buffer,0,sizeof(buffer));
             }
-
-            if(strstr(buffer, "QUERY") != NULL)
+            else if(strstr(buffer, "QUERY") != NULL)
             {
-                printf("recebi um ola\n");
-                flg = 0;
                 flg2 = 0;
 
                 sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
@@ -121,7 +104,8 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                     {
                         for (k = 0; k < 32; k++)
                         {
-                            if(nodo->content[k] != NULL){
+                            if(strcmp(nodo->content[k], "\0"))
+                            {
                                 if(strcmp(arg3, nodo->content[k]) == 0)
                                 {
                                     snprintf(message, sizeof(message), "%s %s %s %s%s", "CONTENT",  arg2, nodo->id, arg3, "\n");
@@ -158,7 +142,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 memset(buffer,0,sizeof(buffer));
             }
 
-            if(strstr(buffer, "CONTENT") != NULL)
+            else if(strstr(buffer, "CONTENT") != NULL)
             {
 
                 updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela); // MUDAR pode ser interno ou externo
@@ -197,7 +181,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 memset(buffer,0,sizeof(buffer));
             }
 
-            if(strstr(buffer, "NOCONTENT") != NULL)
+            else if(strstr(buffer, "NOCONTENT") != NULL)
             {
 
                 updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
@@ -235,11 +219,16 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 }
                 memset(buffer,0,sizeof(buffer));
             }
+            else
+            {
+                printf("Message does not follow protocol. Closing connection to source node.\n");
+                return -1;
+            }
             return 2;
         }
         else
         {
-            printf("Mensagem incompleta.\n");
+            printf("Message does not follow protocol. Closing connection to source node.\n");
             return -1;
         }
     }

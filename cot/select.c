@@ -115,7 +115,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo - nao esta a entrar?
             {
                 FD_CLR(selfClient_fd, &read_fds);
-                if(commTCP(selfClient_fd, nodo, regIP, regUDP, net, selfClient_fd, client_fds) == 1) //externo saiu, enviar a novo externo NEW
+                errcode = commTCP(selfClient_fd, nodo, regIP, regUDP, net, selfClient_fd, client_fds);
+                if(errcode == 1 || errcode == -1) //externo saiu, enviar a novo externo NEW OU mensagem nao segue protocolo
                 {
                     if(strcmp(nodo->bck, nodo->id) == 0)  //se for ancora e sair externo, tem de promover interno caso seja possivel
                     {//verificar se tem internos, promover se tiver, ext = id se nao
@@ -181,14 +182,20 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             {
                 FD_CLR(fds, &read_fds);
                 errcode = commTCP(fds, nodo, regIP, regUDP, net, selfClient_fd, client_fds);
-                if(errcode == 0) // saida de interno
+                if(errcode == 0 || errcode == -1) // saida de interno ou mensagem nao segue protocolo
                 {
+                    strcpy(nodo->intr[fds], "\0");
+                    strcpy(nodo->ipIntr[fds], "\0");
+                    strcpy(nodo->portIntr[fds], "\0"); //limpar informacao do nó que saiu
                     close(fds);
                     num_clients--;
                     client_fds[i] = -1;
                 }
                 if(errcode == 1) //saida de outra ancora - promove interno a ancora
                 {
+                    strcpy(nodo->ext, nodo->bck);
+                    strcpy(nodo->ipExt, nodo->ipBck);
+                    strcpy(nodo->portExt, nodo->portBck);
                     close(fds);
                     num_clients--;
                     client_fds[i] = -1;
