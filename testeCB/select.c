@@ -2,6 +2,7 @@
 #include "select.h"
 #include "udp.h"
 #include "aux.h"
+#include "commTCP.h"
 
 void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 {
@@ -14,6 +15,10 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     int nNodes = 0;
     char line[32];
     char buffer[1024+1], input[128+1], message[128+1];
+
+    char word_array[6][128];
+    int word_count = 0;
+    char *token;
 
     memset(buffer, 0, sizeof(buffer));
     memset(input, 0, sizeof(input));
@@ -43,7 +48,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
         external_addr.sin_addr.s_addr = inet_addr(nodo->ipExt); //IP DO EXTERNO
         external_addr.sin_port = htons(atoi(nodo->portExt)); //PORTA DO EXTERNO
         if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
-        snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
+        snprintf(message, sizeof(message), "%s %s %s %s%s", "NEW", nodo->id, nodo->ip, nodo->port, "\n");
         send(selfClient_fd, message , strlen(message) , 0 );
         fn = 0;
     }
@@ -63,6 +68,9 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
     max_fd = max(server_fd, STDIN_FILENO);
     if(selfClient_fd > max_fd) max_fd = selfClient_fd;
+
+    printf("Type help to display available commands.\n");
+    printf("Enter a command:\n");
 
     while(1)
     {
@@ -92,10 +100,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             client_fd = accept(server_fd, (struct sockaddr*)&client_addr, & client_addrlen);
             if(client_fd == -1) exit(1);
 
-
-            printf("New connection , socket fd is %d , ip is : %s , port : %d\n" , client_fd, inet_ntoa(client_addr.sin_addr) , ntohs
-                  (client_addr.sin_port));
-
             for (int i = 0; i < 100; i++)
             {
                 if (client_fds[i] == -1)
@@ -111,7 +115,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo - nao esta a entrar?
             {
                 FD_CLR(selfClient_fd, &read_fds);
-                if(commTCP(selfClient_fd, nodo, regIP, regUDP, net, selfClient_fd, client_fds) == 1) //externo saiu, enviar a novo externo NEW
+                errcode = commTCP(selfClient_fd, nodo, regIP, regUDP, net, selfClient_fd, client_fds);
+                if(errcode == 1 || errcode == -1) //externo saiu, enviar a novo externo NEW OU mensagem nao segue protocolo
                 {
                     if(strcmp(nodo->bck, nodo->id) == 0)  //se for ancora e sair externo, tem de promover interno caso seja possivel
                     {//verificar se tem internos, promover se tiver, ext = id se nao
@@ -136,7 +141,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                     memset(nodo->portIntr[i], 0, sizeof(nodo->portIntr[i]));
                                     memset(nodo->intr[i], 0, sizeof(nodo->intr[i]));
                                     memset(message, 0, sizeof(message));
-                                    snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
+                                    snprintf(message, sizeof(message), "%s %s %s %s%s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt, "\n");
                                     send(i, message, sizeof(message), 0);
                                     close(selfClient_fd);
                                     fn = 1;
@@ -161,13 +166,11 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                         external_addr.sin_port = htons(atoi(nodo->portExt)); //PORTA DO EXTERNO
                         if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
                         memset(message, 0, sizeof(message));
-                        snprintf(message, sizeof(message), "%s %s %s %s", "NEW", nodo->id, nodo->ip, nodo->port);
+                        snprintf(message, sizeof(message), "%s %s %s %s%s", "NEW", nodo->id, nodo->ip, nodo->port,"\n");
                         send(selfClient_fd, message , strlen(message) , 0 );
                         if(selfClient_fd > max_fd) max_fd = selfClient_fd;
                     }
                 }
-                //read 0 aqui é saida de externo sempre
-                //connect e send para o backup
             }
         }
 
@@ -179,14 +182,20 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             {
                 FD_CLR(fds, &read_fds);
                 errcode = commTCP(fds, nodo, regIP, regUDP, net, selfClient_fd, client_fds);
-                if(errcode == 0) // saida de interno
+                if(errcode == 0 || errcode == -1) // saida de interno ou mensagem nao segue protocolo
                 {
+                    strcpy(nodo->intr[fds], "\0");
+                    strcpy(nodo->ipIntr[fds], "\0");
+                    strcpy(nodo->portIntr[fds], "\0"); //limpar informacao do nó que saiu
                     close(fds);
                     num_clients--;
                     client_fds[i] = -1;
                 }
                 if(errcode == 1) //saida de outra ancora - promove interno a ancora
                 {
+                    strcpy(nodo->ext, nodo->bck);
+                    strcpy(nodo->ipExt, nodo->ipBck);
+                    strcpy(nodo->portExt, nodo->portBck);
                     close(fds);
                     num_clients--;
                     client_fds[i] = -1;
@@ -209,7 +218,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                 memset(nodo->portIntr[j], 0, sizeof(nodo->intr[j]));
                                 memset(nodo->intr[j], 0, sizeof(nodo->intr[j]));
                                 memset(message, 0, sizeof(message));
-                                snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
+                                snprintf(message, sizeof(message), "%s %s %s %s%s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt,"\n");
                                 send(j, message, sizeof(message), 0);
                                 break;
                             }
@@ -228,18 +237,28 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
         {
             fgets(input, sizeof(input), stdin);
 
-            input[strcspn(input, "\n")] = 0;
-
-            char *word_array[6];
-            int word_count = 0;
-
-            char *token = strtok(input, " ");
-            while (token != NULL && word_count < 20) {
-                word_array[word_count++] = token;
-                token = strtok(NULL, " ");
+            if(strcmp(input, "\n") == 0)
+            {
+                command = input;
+                memset(input, 0, sizeof(input));
             }
+            else
+            {
+                word_count = 0;
+                token = NULL;
+                input[strcspn(input, "\n")] = '\0';
 
-            command = word_array[0];
+                token = strtok(input, " ");
+                while (token != NULL && word_count < 20)
+                {
+                    strcpy(word_array[word_count++], token);
+                    token = strtok(NULL, " ");
+                }
+
+                command = word_array[0];
+
+                memset(input, 0, sizeof(input));
+            }
 
             if(strcmp(command, "join") == 0) printf("Error: Already joined.\n");
 
@@ -282,13 +301,19 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
             else if(strcmp(command, "st") == 0)
             {
-                printf("Node %s topology:\nExtern: %s %s %s\nBackup: %s %s %s\nIntern:\n", nodo->id,
+                printf("Node %s topology:\nExtern:\n%s %s %s\nBackup:\n%s %s %s\nIntern:\n", nodo->id,
                 nodo->ext, nodo->ipExt, nodo->portExt, nodo->bck, nodo->ipBck, nodo->portBck);
+                j=0;
                 for(i=0;i<100;i++)
                 {
-                    if(strcmp(nodo->intr[i], "\0") != 0) printf("%s %s %s\n",
-                    nodo->intr[i], nodo->ipIntr[i], nodo->portIntr[i]);
+                    if(strcmp(nodo->intr[i], "\0") != 0) 
+                    {
+                        printf("%s %s %s\n",
+                        nodo->intr[i], nodo->ipIntr[i], nodo->portIntr[i]);
+                        j++;
+                    }   
                 }
+                if(j == 0) printf("None\n");
             }
 
             else if(strcmp(command, "create") == 0)
@@ -297,7 +322,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 else
                 {
                     arg1 = word_array[1];
-                    nodo->content[nodo->ncontents] = calloc(strlen(arg1)+1, sizeof(char));
                     strcpy(nodo->content[nodo->ncontents], arg1);
                     printf("Content %s added. Number of contents: %d.\n", nodo->content[nodo->ncontents], nodo->ncontents+1);
                     nodo->ncontents++;
@@ -315,7 +339,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                         if(strcmp(nodo->content[i], arg1) == 0)
                         {
                             strcpy(nodo->content[i], "\0");
-                            free(nodo->content[i]);
                             printf("Content %s deleted.\n", arg1);
                             nodo->ncontents--;
                             break;
@@ -331,9 +354,9 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 else
                 {
                     printf("List of contents:\n");
-                    for(i=0;i<nodo->ncontents;i++)
+                    for(i=0;i<32;i++)
                     {
-                        printf("%d. %s\n", i+1, nodo->content[i]);
+                        if(strcmp(nodo->content[i], "\0") != 0) printf("%d. %s\n", i+1, nodo->content[i]);
                     }
                 }
             }
@@ -351,6 +374,8 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
             else if(strcmp(command, "get") == 0)
             {
+                if(word_count != 3 ) printf("Invalid Input.\n");
+
                 int k=0;
                 arg1 = word_array[1];
                 arg2 = word_array[2];
@@ -358,7 +383,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 memset(message,0,sizeof(message));
                 memset(buffer,0,sizeof(buffer));
 
-                snprintf(message, sizeof(message), "%s %s", "NODES", "869");
+                snprintf(message, sizeof(message), "%s %s", "NODES", "869"); // MUDAR PARA O ID DA REDE
 
                 if(strncmp(message, "NODES", 5) != 0) printf("Erro");
                 errcode = commUDP(message, buffer, regIP, regUDP);
@@ -381,7 +406,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
                 if(strcmp(line, "\0") == 0)
                 {
-                    printf("Node %s not found in network.\n", arg1);
+                    printf("Node %s not found in network.\n", arg1); // neste if eno proximo ele tem de aceitar o comando seguinte (ta a crashar)
                 }
                 if(strcmp(arg1, nodo->id) == 0)
                 {
@@ -408,7 +433,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 else
                 {
                     memset(message,0,sizeof(message));
-                    snprintf(message, sizeof(message), "%s %s %s %s", "QUERY", arg1, nodo->id, arg2);
+                    snprintf(message, sizeof(message), "%s %s %s %s%s", "QUERY", arg1, nodo->id, arg2,"\n");
 
                     if(selfClient_fd > 0)
                     {
@@ -422,6 +447,13 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                         }
                     }
                 }
+            }
+            else if(strcmp(command, "help") == 0)
+            {
+                printf("Available commands:\n");
+                printf("create - Create a new content\ndelete - Delete existing content\nsn - Show contents\n");
+                printf("get - Search for content in other node\nst - Show node topology\nsr - Show node routing\n");
+                printf("leave - Leave the network and close application\nexit - Close application without leaving\n");
             }
 
             else printf("Command not recognized.\n");
@@ -430,250 +462,4 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
 
         }
     }
-}
-
-
-int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int selfClient_fd, int client_fds[100]) //funcao a ser chamada quando ha atividade no fd de uma ligacao tcp.
-{
-    //RETURN -1 ERRO
-    //RETURN 0 Saida de interno
-    //RETURN 1 Saida de externo
-    //RETURN 2 Comunicacao normal
-    char buffer[1024+1];
-    char auxBuffer[1024+1];
-    char message[1024+1];
-    char command[16], arg1[32], arg2[32], arg3[32];
-    int i = 0, k = 0, u = 0, l = 0, flg = 0 ;
-
-    //if(read(fd, buffer, 1024) == 0) return 0;
-    //else return 1;
-
-    memset(buffer, 0, sizeof(buffer));
-    memset(auxBuffer, 0, sizeof(auxBuffer));
-    memset(message, 0, sizeof(message));
-    memset(command, 0, sizeof(command));
-    memset(arg1, 0, sizeof(arg1));
-    memset(arg2, 0, sizeof(arg2));
-    memset(arg3, 0, sizeof(arg3));
-
-    //verificar se foi saída
-    if(read(fd, buffer, 1024) == 0) //return 0 caso o nó onde houve atividade tenha saido da rede.
-    {
-
-        //INSERIR ENVIO DE WITHDRAW AQUI
-
-        for(i = 0;i < 100;i++) //verificar se saiu interno
-        {
-            if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) //saiu um interno
-            {
-
-
-                strcpy(nodo->intr[i], "\0");
-                strcpy(nodo->ipIntr[i], "\0");
-                strcpy(nodo->portIntr[i], "\0"); //limpar informacao do nó que saiu
-                return 0;
-            }
-        }
-
-	    if(strcmp(nodo->bck, nodo->id) == 0) return 1; //verificar se é ancora - sabe-se que nao saiu interno logo saiu a outra ancora(ext)
-        else //se nao for ancora, apenas saiu um externo
-        {
-            strcpy(nodo->ext, nodo->bck);
-            strcpy(nodo->ipExt, nodo->ipBck);
-            strcpy(nodo->portExt, nodo->portBck);
-            return 1;
-        }
-        return -1;
-    }
-    else //caso exista comunicacao, return 2.
-    {
-        //printf("RECEBIDO: %s\n", buffer);
-        /*verificar o que recebeu
-            new
-            extern
-            withdraw
-            query
-            content
-            nocontent*/
-
-        if(strstr(buffer, "NEW") != NULL) //se for new
-        {
-            //arg1 = id; arg2 = IP; arg3 = TCP
-            if(strcmp(nodo->ext, nodo->id) == 0)
-            {
-                sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-                strcpy(nodo->ext, arg1);
-                strcpy(nodo->ipExt, arg2);
-                strcpy(nodo->portExt, arg3);
-                snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
-                send(fd, message, strlen(message), 0);
-            }
-            else //se nao for o primeiro nó
-            {
-                sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-                strcpy(nodo->intr[fd], arg1);
-                strcpy(nodo->ipIntr[fd], arg2);
-                strcpy(nodo->portIntr[fd], arg3);
-                snprintf(message, sizeof(message), "%s %s %s %s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt);
-                send(fd, message, strlen(message), 0);
-            }
-        }
-        if(strstr(buffer, "EXTERN") != NULL) //se for null
-        {
-            sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-            strcpy(nodo->bck, arg1);
-            strcpy(nodo->ipBck, arg2);
-            strcpy(nodo->portBck, arg3);
-        }
-
-        if(strstr(buffer, "QUERY") != NULL)
-        {
-            printf("recebi um ola\n");
-            flg = 0;
-            sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-
-            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
-
-            if(strcmp(arg1, nodo->id) == 0)
-            {
-                if(nodo->ncontents == 0)
-                {
-                    snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", nodo->id, arg1, arg2);
-                    send(fd, message, strlen(message), 0);
-                }
-                for (k = 0; k < 32; k++)
-                {
-
-                    if(k == 31)
-                    {
-                        snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", nodo->id, arg1, arg2);
-                        send(fd, message, strlen(message), 0);
-                        break;
-                    }
-                    if(strcmp(nodo->content[k], arg2) == 0)
-                    {
-                        snprintf(message, sizeof(message), "%s %s %s %s", "CONTENT", nodo->id, arg1, arg2);
-                        send(fd, message, strlen(message), 0);
-                        break;
-                    }
-                }
-            }
-
-            else
-            {
-                snprintf(message, sizeof(message), "%s %s %s %s", "QUERY", arg1, arg2, arg3);
-
-                for (l = 0; l < 100; l++)
-                {
-                    if(nodo->table1[i] == arg2)
-                    {
-                        if(strcmp(nodo->ext, arg2) == 0){
-                            send(selfClient_fd, message, strlen(message), 0);
-                            flg = 1;
-                        }
-                        else
-                        {
-                            for (u = 0; u < 100; u++)
-                            {
-                                if(u == atoi(arg2))
-                                {
-                                    send(client_fds[u], message, strlen(message), 0); //send message to fd of table2[i]
-                                    flg = 1;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if(flg == 0){
-                    if(selfClient_fd > 0)
-                    {
-                        send(selfClient_fd, message, strlen(message), 0);
-                    }
-                    for (int l = 0; l < 100; l++)
-                    {
-                        if(client_fds[l] != -1)
-                        {
-                            send(client_fds[l], message, strlen(message), 0);
-                            break;
-                        }
-                    }
-                }
-            }
-            flg = 0;
-
-            printf("Tabela 2 item é %s\n", nodo->intr[fd]);
-
-            printf("%s   %s\n",nodo->table1[0], nodo->table2[0]);
-            printf("%s   %s\n",nodo->table1[1], nodo->table2[1]);
-        }
-
-        if(strstr(buffer, "CONTENT") != NULL)
-        {
-
-            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
-
-            sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-
-            if(strcmp(arg1, nodo->id) == 0)
-            {
-                printf("Encontrei o ficheiro\n");
-            }
-            else
-            {
-                snprintf(message, sizeof(message), "%s %s %s %s", "CONTENT", arg1, arg2, arg3);
-                send(fd, message, strlen(message), 0);
-            }
-        }
-
-        if(strstr(buffer, "NOCONTENT") != NULL)
-        {
-
-            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
-
-            sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-
-            if(strcmp(arg1, nodo->id) == 0)
-            {
-                printf("Não encontrei o ficheiro\n");
-            }
-            else
-            {
-                snprintf(message, sizeof(message), "%s %s %s %s", "NOCONTENT", arg1, arg2, arg3);
-                for (int i = 0; i < 100; i++)
-                {
-                    if(strcmp(nodo->intr[i], "\0") != 0 && strcmp(nodo->intr[i], nodo->intr[fd]) != 0)
-                    {
-                        send(fd, message, strlen(message), 0);
-                        break;
-                    }
-                }
-            }
-        }
-        if(strstr(buffer, "WITHDRAW") != NULL)
-        {
-            sscanf(buffer, "%s %s", command, arg1);
-            for (int i = 0; i < 100; i++)
-            {
-                if(strcmp(nodo->table1[i], arg1) == 0)
-                {
-                    memset(nodo->table1[i],0,strlen(nodo->table1[i]));
-                    memset(nodo->table2[i],0,strlen(nodo->table2[i]));
-                    break;
-                }
-                if(strcmp(nodo->table1[i], "\0") == 0) break;
-            }
-
-            //enviar withdraw para outros nos
-            /*snprintf(message, sizeof(message), "%s %s", "WITHDRAW", arg1);
-            for (int i = 0; i < 100; i++)
-            {
-
-            }*/
-        }
-        return 2;
-    }
-    return -1;
-
 }

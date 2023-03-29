@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <time.h>
 #define ROWS 100
-#define COLS 2
+#define COLS 3
 
 struct node{
     char id[4];
@@ -26,7 +26,7 @@ struct node{
     char ipIntr[100][16];
     char portIntr[100][6];
 
-    char *content[32]; //max de 32 conteudos
+    char content[32][100]; //max de 32 conteudos
     int ncontents;
 
     char table1[ROWS][COLS];

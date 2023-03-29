@@ -37,10 +37,48 @@
 
 1679250375 /home/andre/Documents/testeCB/aux.h
 
-1680027126 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/aux.c
+1679478321 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/aux.c
 	"cot.h"
 
-1680027126 /home/andre/Documents/GitHub/rci-projeto/testeCB/cot.h
+1679677795 /home/andre/Documents/GitHub/rci-projeto/testeCB/cot.h
+	<stdio.h>
+	<stdlib.h>
+	<sys/types.h>
+	<sys/socket.h>
+	<netdb.h>
+	<string.h>
+	<unistd.h>
+
+1679677790 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/udp.c
+	"cot.h"
+	"udp.h"
+
+1679677790 /home/andre/Documents/GitHub/rci-projeto/testeCB/udp.h
+	<arpa/inet.h>
+
+1679757095 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/cot.c
+	"cot.h"
+	"udp.h"
+	"select.h"
+	"aux.h"
+
+1679677802 /home/andre/Documents/GitHub/rci-projeto/testeCB/select.h
+	<errno.h>
+	<netinet/in.h>
+	<sys/time.h>
+	<arpa/inet.h>
+
+1679250375 /home/andre/Documents/GitHub/rci-projeto/testeCB/aux.h
+
+1679757586 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/select.c
+	"cot.h"
+	"select.h"
+	"udp.h"
+
+1680094255 source:/home/milocas/Desktop/bosta/aux.c
+	"cot.h"
+
+1680085900 /home/milocas/Desktop/bosta/cot.h
 	<stdio.h>
 	<stdlib.h>
 	<sys/types.h>
@@ -50,28 +88,37 @@
 	<unistd.h>
 	<time.h>
 
-1680028851 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/udp.c
+1680035252 source:/home/milocas/Desktop/bosta/udp.c
 	"cot.h"
 	"udp.h"
 
-1679309296 /home/andre/Documents/GitHub/rci-projeto/testeCB/udp.h
+1678996176 /home/milocas/Desktop/bosta/udp.h
 	<arpa/inet.h>
 
-1680028785 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/cot.c
+1680085900 source:/home/milocas/Desktop/bosta/cot.c
 	"cot.h"
 	"udp.h"
 	"select.h"
 	"aux.h"
 
-1680027126 /home/andre/Documents/GitHub/rci-projeto/testeCB/select.h
+1680074948 /home/milocas/Desktop/bosta/select.h
 	<errno.h>
 	<netinet/in.h>
 	<sys/time.h>
 	<arpa/inet.h>
 
-1680027126 /home/andre/Documents/GitHub/rci-projeto/testeCB/aux.h
+1679990028 /home/milocas/Desktop/bosta/aux.h
 
-1680027126 source:/home/andre/Documents/GitHub/rci-projeto/testeCB/select.c
+1680086623 source:/home/milocas/Desktop/bosta/select.c
+	"cot.h"
+	"select.h"
+	"udp.h"
+	"aux.h"
+	"commTCP.h"
+
+1680074948 /home/milocas/Desktop/bosta/commTCP.h
+
+1680096010 source:/home/milocas/Desktop/bosta/commTCP.c
 	"cot.h"
 	"select.h"
 	"udp.h"

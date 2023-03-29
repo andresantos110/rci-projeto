@@ -15,9 +15,26 @@ int main(int argc, char **argv)
     int nNodes = 0;
     struct node *nodo = (struct node*) malloc (sizeof(struct node));
 
-    initNode(nodo);
+    char word_array[6][128];
+    int word_count = 0;
+    char *token;
+
+    initNode(nodo); //memset a 0 de todos os vetores do nó - evitar lixo
 
     nodo->ncontents = 0;
+
+    for(i = 0; i < 32; i++)
+    {
+        strcpy(nodo->content[i], "\0");
+    }
+    for(i = 0; i < 100; i++)
+    {
+        strcpy(nodo->table1[i], "\0");
+    }
+    for(i = 0; i < 100; i++)
+    {
+        strcpy(nodo->table2[i], "\0");
+    }
 
     memset(buffer, 0, sizeof(buffer));
 
@@ -64,28 +81,36 @@ int main(int argc, char **argv)
     }*/
 
 
+    printf("cot - Group 105\n");
+    printf("Type help to show available commands.\n");
     printf("Enter a command:\n");
-    printf("join - Join the network\ndjoin - Join a known network\n");
-    printf("create - Create a new content\ndelete - Delete existing content\nsn - Show contents\n");
-    printf("exit - Close application\nMore commands available after joining a network.\n");
 
     while(1)
     {
         fgets(input, sizeof(input), stdin);
 
-        input[strcspn(input, "\n")] = '\0';
-
-        char word_array[6][128];
-        int word_count = 0;
-
-        char *token = strtok(input, " ");
-        while (token != NULL && word_count < 20)
+        if(strcmp(input, "\n") == 0)
         {
-            strcpy(word_array[word_count++], token);
-            token = strtok(NULL, " ");
+            command = input;
+            memset(input, 0, sizeof(input));
         }
+        else
+        {
+            word_count = 0;
+            token = NULL;
+            input[strcspn(input, "\n")] = '\0';
 
-        command = word_array[0];
+            token = strtok(input, " ");
+            while (token != NULL && word_count < 20)
+            {
+                strcpy(word_array[word_count++], token);
+                token = strtok(NULL, " ");
+            }
+
+            command = word_array[0];
+
+            memset(input, 0, sizeof(input));
+        }
 
         if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
         {
@@ -130,7 +155,7 @@ int main(int argc, char **argv)
             for (i=0; buffer[i]; i++) nNodes += (buffer[i] == '\n');
             nNodes--;
             printf("Number of nodes in the network: %d\n", nNodes);
-            if(nNodes>0) printf("These nodes are:\n%s", buffer);
+            if(nNodes>0) printf("These nodes are:\n%s", buffer+14);
 
             if(nNodes == 0)
             {
@@ -295,7 +320,6 @@ int main(int argc, char **argv)
             else
             {
                 arg1 = word_array[1];
-                nodo->content[nodo->ncontents] = calloc(strlen(arg1)+1, sizeof(char));
                 strcpy(nodo->content[nodo->ncontents], arg1);
                 printf("Content %s added. Number of contents: %d.\n", nodo->content[nodo->ncontents], nodo->ncontents+1);
                 nodo->ncontents++;
@@ -313,7 +337,6 @@ int main(int argc, char **argv)
                     if(strcmp(nodo->content[i], arg1) == 0)
                     {
                         strcpy(nodo->content[i], "\0");
-                        free(nodo->content[i]);
                         printf("Content %s deleted.\n", arg1);
                         nodo->ncontents--;
                         break;
@@ -329,13 +352,22 @@ int main(int argc, char **argv)
             else
             {
                 printf("List of contents:\n");
-                for(i=0;i<nodo->ncontents;i++)
+                for(i=0;i<32;i++)
                 {
-                    printf("%d. %s\n", i, nodo->content[i]);
+                    if(strcmp(nodo->content[i], "\0") != 0) printf("%d. %s\n", i+1, nodo->content[i]);
                 }
             }
         }
-        else printf("Command not recognized.\n");
+        else if(strcmp(command, "help") == 0)
+        {
+            printf("join - Join the network\ndjoin - Join a known network\n");
+            printf("create - Create a new content\ndelete - Delete existing content\nsn - Show contents\n");
+            printf("exit - Close application\nMore commands available after joining a network.\n");
+        }
+        else
+        {
+            printf("Command not recognized.\n");
+        }
     }
 
     free(nodo);
