@@ -51,6 +51,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
         external_addr.sin_port = htons(atoi(nodo->portExt)); //PORTA DO EXTERNO
         if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
         snprintf(message, sizeof(message), "%s %s %s %s%s", "NEW", nodo->id, nodo->ip, nodo->port, "\n");
+        nodo->fdExt = selfClient_fd;
         send(selfClient_fd, message , strlen(message) , 0 );
         fn = 0;
     }
@@ -130,6 +131,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                             strcpy(nodo->ext, nodo->id);
                             strcpy(nodo->ipExt, nodo->ip);
                             strcpy(nodo->portExt, nodo->port);
+                            nodo->fdExt = 0;
                             close(selfClient_fd);
                             fn = 1;
                         }
@@ -142,6 +144,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                     strcpy(nodo->ext, nodo->intr[i]);
                                     strcpy(nodo->ipExt, nodo->ipIntr[i]);
                                     strcpy(nodo->portExt, nodo->portIntr[i]);
+                                    nodo->fdExt = i;
                                     memset(nodo->ipIntr[i], 0, sizeof(nodo->ipIntr[i]));
                                     memset(nodo->portIntr[i], 0, sizeof(nodo->portIntr[i]));
                                     memset(nodo->intr[i], 0, sizeof(nodo->intr[i]));
@@ -209,6 +212,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                         strcpy(nodo->ext, nodo->id);
                         strcpy(nodo->ipExt, nodo->ip);
                         strcpy(nodo->portExt, nodo->port);
+                        nodo->fdExt = 0;
                     }
                     else
                     {
@@ -219,6 +223,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                 strcpy(nodo->ext, nodo->intr[j]);
                                 strcpy(nodo->ipExt, nodo->ipIntr[j]);
                                 strcpy(nodo->portExt, nodo->portIntr[j]);
+                                nodo->fdExt = j;
                                 memset(nodo->ipIntr[j], 0, sizeof(nodo->intr[j]));
                                 memset(nodo->portIntr[j], 0, sizeof(nodo->intr[j]));
                                 memset(nodo->intr[j], 0, sizeof(nodo->intr[j]));
@@ -376,12 +381,16 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 }
                 else printf("Resuming...\n");
             }
+
             else if(strcmp(command, "sr") == 0)
             {
-                for (int h = 0; h < 100; h++){
+                printf("Routing Table:\n");
+                printf("Destination     Neighbour");
+                for (int h = 0; h < 100; h++)
+                {
                     if(strcmp(nodo->table1[h] , "\0") != 0)
                     {
-                        printf(" %s      %s  \n", nodo->table1[h], nodo->table2[h]);
+                        printf(" %s %s  \n", nodo->table1[h], nodo->table2[h]);
                     }
                 }
             }

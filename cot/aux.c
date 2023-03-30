@@ -60,38 +60,34 @@ int initNode(struct node *nodo)
     return 0;
 }
 
-int updateTable(char arg2[], char ola[], char table1[ROWS][COLS], char table2[ROWS][COLS], int ntabela)
+int updateTable(char origem[], char dest[], struct node *nodo)
 {
+    int i;
 
-    int flag = 0, i = 0, l = 0;
-
-    if(ntabela == 100)
+    printf("Origem: %s\nDest: %s\nSizes: %ld %ld\n", origem, dest, strlen(origem), strlen(dest));
+    if(nodo->ntabela == 100)
     {
-        printf("Table Full\n");
-        return 1;
+        printf("Table is full.\n");
+        return -1;
     }
 
-    for(l = 0; l < 100; l++)
+    for(i=0;i<100;i++)
+    if(strcmp(nodo->table1[i], origem) == 0)
     {
-        if(strcmp(table1[l], arg2) == 0)
-        {
-            flag = 1;
-            break;
-        }
-     }
-
-    if(flag == 0)
+        printf("Node already on the table.\n");
+        return -1;
+    }
+    for(i=0;i<100;i++)
     {
-        for(i = 0; i < 100; i++)
+        if(strcmp(nodo->table1[i], "\0") == 0)
         {
-            if(strcmp(table1[i], "\0") == 0)
-            {
-                strcpy(table1[i], arg2);
-                strcpy(table2[i], ola);
-                ntabela++;
-                break;
-            }
+            strcpy(nodo->table1[i], origem);
+            strcpy(nodo->table2[i], dest);
+            nodo->ntabela++;
+            printf("Atualizou: %s %s\n", nodo->table1[i], nodo->table2[i]);
+            return 0;
         }
-     }
-     return 2;
+    }
+    
+    return -1;
 }

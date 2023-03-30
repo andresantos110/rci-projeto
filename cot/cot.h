@@ -17,6 +17,7 @@ struct node{
     char ext[3];
     char ipExt[16];
     char portExt[6];
+    int fdExt;
 
     char bck[3];
     char ipBck[16];
