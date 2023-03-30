@@ -280,18 +280,6 @@ int main(int argc, char **argv)
                 exit(1);
             }
 
-            if(strlen(arg4) != 15)
-            {
-                printf("Invalid argument (%s). Exiting.\n", arg4);
-                exit(1);
-            }
-
-            if(strlen(arg4) != 5)
-            {
-                printf("Invalid argument (%s). Exiting.\n", arg5);
-                exit(1);
-            }
-
             strcpy(nodo->id, arg2);
             strcpy(nodo->ext, arg3);
             strcpy(nodo->ipExt, arg4);
