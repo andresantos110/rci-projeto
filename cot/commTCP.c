@@ -31,12 +31,17 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
     {
 
         //INSERIR ENVIO DE WITHDRAW AQUI
-
+        printf("Lost connection to node %s.\n", nodo->ext);
         for(i = 0;i < 100;i++) //verificar se saiu interno
         {
-            if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) return 0;
+            if(strcmp(nodo->intr[i], "\0") != 0 && i == fd) 
+            {
+                printf("Lost connection to internal node.\nType st to show new topology.\n");
+                return 0;
+            }
         }
 
+        printf("Lost connection to external node.\nType st to show new topology.\n");
         return 1;
     }
     else //caso exista comunicacao, return 2.
@@ -87,7 +92,6 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
             else if(strstr(buffer, "QUERY") != NULL)
             {
-                printf("recebi um ola\n");
                 flg2 = 0;
 
                 sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
@@ -111,6 +115,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 {
                     if(nodo->ncontents == 0)
                     {
+                        printf("NOCONTENT sent\n");
                         snprintf(message, sizeof(message), "%s %s %s %s%s", "NOCONTENT",  arg2, nodo->id, arg3, "\n");
                         send(fd, message, strlen(message), 0);
                         flg2 = 1;
@@ -123,6 +128,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                             {
                                 if(strcmp(arg3, nodo->content[k]) == 0)
                                 {
+                                    printf("CONTENT sent\n");
                                     snprintf(message, sizeof(message), "%s %s %s %s%s", "CONTENT",  arg2, nodo->id, arg3, "\n");
                                     send(fd, message, strlen(message), 0);
                                     flg2 = 2;
@@ -134,6 +140,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                     }
                     if(flg2 == 0)
                     {
+                        printf("NOCONTENT sent\n");
                         snprintf(message, sizeof(message), "%s %s %s %s%s", "NOCONTENT",  arg2, nodo->id, arg3, "\n");
                         send(fd, message, strlen(message), 0);
                     }
@@ -172,86 +179,71 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
                 sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
 
-                if(strcmp(arg1, nodo->id) == 0)
+                if(strlen(command)>7)
                 {
-                    printf("Encontrei o ficheiro\n");
-                }
-                else
-                {
-
-                    for (l = 0; l < 100; l++)
+                    if(strcmp(arg1, nodo->id) == 0)
                     {
-                        if(nodo->table1[l] == arg1)
+                        printf("File not found.\n");
+                    }
+                    else
+                    {
+                        for (l = 0; l < 100; l++)
                         {
-                            if(strcmp(nodo->table2[l], nodo->ext) == 0)
+                            if(nodo->table1[l] == arg1)
                             {
-                                send(selfClient_fd, buffer, strlen(buffer), 0);
-                            }
-                            else
-                            {
-                                for(k = 0; k < 100; k++)
+                                if(strcmp(nodo->table2[l], nodo->ext) == 0)
                                 {
-                                    if(strcmp(nodo->table2[l], nodo->intr[k]) == 0)
-                                    {
-                                        send(k, buffer, sizeof(buffer), 0);
-                                    }
+                                    send(selfClient_fd, buffer, strlen(buffer), 0);
                                 }
-
-                            }
-                        }
-                    }
-                }
-                memset(buffer,0,sizeof(buffer));
-            }
-
-            else if(strstr(buffer, "NOCONTENT") != NULL)
-            {
-
-                if(selfClient_fd == fd)
-                {
-                    updateTable(arg2, nodo->ext, nodo->table1, nodo->table2, nodo->ntabela);
-                }
-                else
-                {
-                    for(u = 0; u < 100; u++)
-                    {
-                        if(client_fds[u] == fd)
-                        {
-                            updateTable(arg2, nodo->intr[fd], nodo->table1, nodo->table2, nodo->ntabela);
-                        }
-                    }
-                }
-
-                sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-
-                if(strcmp(arg1, nodo->id) == 0)
-                {
-                    printf("Não encontrei o ficheiro\n");
-                }
-                else
-                {
-
-                    for (l = 0; l < 100; l++)
-                    {
-                        if(nodo->table1[l] == arg1)
-                        {
-                            if(strcmp(nodo->table2[l], nodo->ext) == 0)
-                            {
-                                send(selfClient_fd, buffer, strlen(buffer), 0);
-                            }
-                            else
-                            {
-                                for(u = 0; u < 100; u++)
+                                else
                                 {
-                                    if(strcmp(nodo->table2[l], nodo->intr[u]) == 0)
+                                    for(u = 0; u < 100; u++)
                                     {
-                                        send(u, buffer, sizeof(buffer), 0);
+                                        if(strcmp(nodo->table2[l], nodo->intr[u]) == 0)
+                                        {
+                                            send(u, buffer, sizeof(buffer), 0);
+                                        }
                                     }
-                                }
 
+                                }
                             }
                         }
                     }
+
+                }
+
+                else
+                {
+                    if(strcmp(arg1, nodo->id) == 0)
+                    {
+                        printf("Encontrei o ficheiro\n");
+                    }
+                    else
+                    {
+
+                        for (l = 0; l < 100; l++)
+                        {
+                            if(nodo->table1[l] == arg1)
+                            {
+                                if(strcmp(nodo->table2[l], nodo->ext) == 0)
+                                {
+                                    send(selfClient_fd, buffer, strlen(buffer), 0);
+                                }
+                                else
+                                {
+                                    for(k = 0; k < 100; k++)
+                                    {
+                                        if(strcmp(nodo->table2[l], nodo->intr[k]) == 0)
+                                        {
+                                            send(k, buffer, sizeof(buffer), 0);
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
                 }
 
                 memset(buffer,0,sizeof(buffer));

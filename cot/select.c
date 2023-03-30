@@ -339,7 +339,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 if(nodo->ncontents == 0) printf("There are no contents.\n");
                 else
                 {
-                    for(i=0;i<nodo->ncontents;i++)
+                    for(i=0;i<32;i++)
                     {
                         if(strcmp(nodo->content[i], arg1) == 0)
                         {
@@ -375,6 +375,15 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                     exit(0);
                 }
                 else printf("Resuming...\n");
+            }
+            else if(strcmp(command, "sr") == 0)
+            {
+                for (int h = 0; h < 100; h++){
+                    if(strcmp(nodo->table1[h] , "\0") != 0)
+                    {
+                        printf(" %s      %s  \n", nodo->table1[h], nodo->table2[h]);
+                    }
+                }
             }
 
             else if(strcmp(command, "get") == 0)

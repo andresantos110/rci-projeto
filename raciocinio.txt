@@ -35,5 +35,3 @@ para saber a que fd corresponde cada nó, guarda em intr[fd] o id do nó
 TODO: 
 
 WITHDRAW
-
-timeout select

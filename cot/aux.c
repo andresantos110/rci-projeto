@@ -51,40 +51,40 @@ int initNode(struct node *nodo)
         memset(nodo->ipIntr[i], 0, sizeof(nodo->ipIntr[i]));
         memset(nodo->portIntr[i], 0, sizeof(nodo->portIntr[i]));
     }
-    return 0;
 
     for(i = 0; i < 100; i++)
     {
         memset(nodo->table1[i], 0, sizeof(nodo->table1[i]));
         memset(nodo->table2[i], 0, sizeof(nodo->table2[i]));
     }
+    return 0;
 }
 
-
-void updateTable(char arg2[], char ola[], char table1[ROWS][COLS], char table2[ROWS][COLS], int ntabela)
+int updateTable(char arg2[], char ola[], char table1[ROWS][COLS], char table2[ROWS][COLS], int ntabela)
 {
 
-    int flag = 0;
+    int flag = 0, i = 0, l = 0;
 
-    if(ntabela == 100) printf("Table Full\n");
-
-    for (int i = 0; i < 100; i++)
+    if(ntabela == 100)
     {
-        if(strcmp(table1[i], arg2) == 0 && strcmp(table2[i], ola) == 0)
+        printf("Table Full\n");
+        return 1;
+    }
+
+    for(l = 0; l < 100; l++)
+    {
+        if(strcmp(table1[l], arg2) == 0)
         {
             flag = 1;
             break;
         }
-        else
-        {
-            flag = 0;
-        }
      }
-     if(flag == 0)
-     {
-        for (int i = 0; i < 100; i++)
-         {
-            if(strcmp(table1[i], "\0") == 0 && strcmp(table2[i], "\0") == 0)
+
+    if(flag == 0)
+    {
+        for(i = 0; i < 100; i++)
+        {
+            if(strcmp(table1[i], "\0") == 0)
             {
                 strcpy(table1[i], arg2);
                 strcpy(table2[i], ola);
@@ -93,4 +93,5 @@ void updateTable(char arg2[], char ola[], char table1[ROWS][COLS], char table2[R
             }
         }
      }
+     return 2;
 }
