@@ -63,18 +63,16 @@ int initNode(struct node *nodo)
 int updateTable(char origem[], char dest[], struct node *nodo)
 {
     int i;
+    if(strcmp(origem, nodo->id) == 0) return 0;
 
-    printf("Origem: %s\nDest: %s\nSizes: %ld %ld\n", origem, dest, strlen(origem), strlen(dest));
     if(nodo->ntabela == 100)
     {
-        printf("Table is full.\n");
         return -1;
     }
 
     for(i=0;i<100;i++)
     if(strcmp(nodo->table1[i], origem) == 0)
     {
-        printf("Node already on the table.\n");
         return -1;
     }
     for(i=0;i<100;i++)
@@ -84,10 +82,9 @@ int updateTable(char origem[], char dest[], struct node *nodo)
             strcpy(nodo->table1[i], origem);
             strcpy(nodo->table2[i], dest);
             nodo->ntabela++;
-            printf("Atualizou: %s %s\n", nodo->table1[i], nodo->table2[i]);
             return 0;
         }
     }
-    
+
     return -1;
 }

@@ -150,7 +150,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                                     memset(nodo->intr[i], 0, sizeof(nodo->intr[i]));
                                     memset(message, 0, sizeof(message));
                                     snprintf(message, sizeof(message), "%s %s %s %s%s", "EXTERN", nodo->ext, nodo->ipExt, nodo->portExt, "\n");
-                                    send(i, message, sizeof(message), 0);
+                                    send(i, message, strlen(message), 0);
                                     close(selfClient_fd);
                                     fn = 1;
                                     break;
@@ -385,12 +385,12 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             else if(strcmp(command, "sr") == 0)
             {
                 printf("Routing Table:\n");
-                printf("Destination     Neighbour");
+                printf("Destination  |  Neighbour\n");
                 for (int h = 0; h < 100; h++)
                 {
                     if(strcmp(nodo->table1[h] , "\0") != 0)
                     {
-                        printf(" %s %s  \n", nodo->table1[h], nodo->table2[h]);
+                        printf("     %s      |     %s     \n", nodo->table1[h], nodo->table2[h]);
                     }
                 }
             }
