@@ -175,7 +175,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
                 if(strcmp(arg1, nodo->id) == 0)
                 {
-                    printf("Received query for content %s from node %s.\n", arg3, arg1);
+                    printf("Received query for content %s from node %s.\n", arg3, arg2);
                     if(nodo->ncontents == 0)
                     {
                         snprintf(message, sizeof(message), "%s %s %s %s%s", "NOCONTENT",  arg2, arg1, arg3, "\n");
