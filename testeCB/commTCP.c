@@ -36,22 +36,82 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
     if(read(fd, buffer, 1024) == 0) //return 0 caso o nó onde houve atividade tenha saido da rede.
     {
 
-        //INSERIR ENVIO DE WITHDRAW AQUI
-        for(i = 0;i < 100;i++) //verificar se saiu interno
+        if(strcmp(nodo->intr[fd], "\0") != 0)
         {
-            if(strcmp(nodo->intr[i], "\0") != 0 && i == fd)
+            
+            strcpy(nodo->intr[fd], "\0");
+            strcpy(nodo->ipIntr[fd], "\0");
+            strcpy(nodo->portIntr[fd], "\0"); //limpar informacao do nó que saiu
+            for (i = 0; i < 100; i++)
             {
-                printf("Lost connection to internal node.\nType st to show new topology.\n");
-                return 0;
+                if(strcmp(nodo->table1[i], nodo->intr[fd]) == 0)
+                {
+                    memset(nodo->table1[i],0,strlen(nodo->table1[i]));
+                    memset(nodo->table2[i],0,strlen(nodo->table2[i]));
+                    strcpy(nodo->table1[i], "\0");
+                    strcpy(nodo->table2[i], "\0");
+                }
+                if(strcmp(nodo->table2[i], nodo->intr[fd]) == 0)
+                {
+                    memset(nodo->table1[i],0,strlen(nodo->table1[i]));
+                    memset(nodo->table2[i],0,strlen(nodo->table2[i]));
+                    strcpy(nodo->table1[i], "\0");
+                    strcpy(nodo->table2[i], "\0");
+                }
+            }
+
+            snprintf(message, sizeof(message), "%s %s%s", "WITHDRAW", nodo->intr[fd], "\n");
+            for(u = 0; u < 100; u++)
+            {
+                if(client_fds[u] != fd && client_fds[u] > 0) send(client_fds[u], message, strlen(message), 0);
+            }
+
+            if(selfClient_fd > 0 && selfClient_fd != fd) send(selfClient_fd, message, strlen(message), 0);
+            printf("Lost connection to internal node.\nType st to show new topology.\n");
+            return 0;
+
+        }
+
+        for (i = 0; i < 100; i++)
+        {
+            if(strcmp(nodo->table1[i], nodo->intr[fd]) == 0)
+            {
+                memset(nodo->table1[i],0,strlen(nodo->table1[i]));
+                memset(nodo->table2[i],0,strlen(nodo->table2[i]));
+                strcpy(nodo->table1[i], "\0");
+                strcpy(nodo->table2[i], "\0");
+            }
+            if(strcmp(nodo->table2[i], nodo->intr[fd]) == 0)
+            {
+                memset(nodo->table1[i],0,strlen(nodo->table1[i]));
+                memset(nodo->table2[i],0,strlen(nodo->table2[i]));
+                strcpy(nodo->table1[i], "\0");
+                strcpy(nodo->table2[i], "\0");
             }
         }
 
+        snprintf(message, sizeof(message), "%s %s%s", "WITHDRAW", nodo->ext, "\n");
+        for(u = 0; u < 100; u++)
+        {
+            if(client_fds[u] != fd && client_fds[u] > 0) send(client_fds[u], message, strlen(message), 0);
+        }
+
+        if(selfClient_fd > 0 && selfClient_fd != fd) send(selfClient_fd, message, strlen(message), 0);
         printf("Lost connection to external node.\nType st to show new topology.\n");
-        return 1;
+        if(strcmp(nodo->bck, nodo->id) == 0) return 1;
+        else
+        {
+            strcpy(nodo->ext, nodo->bck);
+            strcpy(nodo->ipExt, nodo->ipBck);
+            strcpy(nodo->portExt, nodo->portBck);
+            return 1;
+        }
+
+        return -1;
     }
     else //caso exista comunicacao, return 2.
     {
-        printf("RECEBIDO: %s\n", buffer);
+        //printf("RECEBIDO: %s\n", buffer);
         /*verificar o que recebeu
             new
             extern
@@ -102,7 +162,6 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 flg2 = 0;
 
                 sscanf(buffer, "%s %s %s %s", command, arg1, arg2, arg3);
-                printf("ext: %d  fd %d\n", nodo->fdExt,fd);
                 if(nodo->fdExt == fd)
                 {
                     updateTable(arg2, nodo->ext, nodo);
@@ -120,10 +179,11 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
                 if(strcmp(arg1, nodo->id) == 0)
                 {
+                    printf("Received query for content %s from node %s.\n", arg3, arg1);
                     if(nodo->ncontents == 0)
                     {
-                        printf("NOCONTENT sent\n");
                         snprintf(message, sizeof(message), "%s %s %s %s%s", "NOCONTENT",  arg2, arg1, arg3, "\n");
+                        printf("Content not found. Replying...\n");
                         send(fd, message, strlen(message), 0);
                         flg2 = 1;
                     }
@@ -135,7 +195,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                             {
                                 if(strcmp(arg3, nodo->content[k]) == 0)
                                 {
-                                    printf("CONTENT sent\n");
+                                    printf("Content found. Replying...\n");
                                     snprintf(message, sizeof(message), "%s %s %s %s%s", "CONTENT",  arg2, arg1, arg3, "\n");
                                     send(fd, message, strlen(message), 0);
                                     flg2 = 2;
@@ -147,7 +207,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                     }
                     if(flg2 == 0)
                     {
-                        printf("NOCONTENT sent\n");
+                        printf("Content not found. Replying...\n");
                         snprintf(message, sizeof(message), "%s %s %s %s%s", "NOCONTENT",  arg2, arg1, arg3, "\n");
                         send(fd, message, strlen(message), 0);
                     }
@@ -185,12 +245,11 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                         }
                     }
                 }
-                printf("COMMAND: %s\nSIZEOF: %ld\n", command, strlen(command));
                 if(strlen(command) == 9)
                 {
                     if(strcmp(arg1, nodo->id) == 0)
                     {
-                        printf("File not found.\n");
+                        printf("Could not find content %s in node %s.\n", arg3, arg2);
                         return 2;
                     }
                     else
@@ -226,7 +285,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 {
                     if(strcmp(arg1, nodo->id) == 0)
                     {
-                        printf("File found.\n");
+                        printf("Found content %s in node %s.\n", arg3, arg2);
                         return 2;
                     }
                     else
@@ -261,44 +320,34 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 }
                 memset(buffer,0,sizeof(buffer));
             }
-            else if(strstr(buffer, "WITHDRAW") != NULL)
+            else if(strstr(buffer, "WITHDRAW") != NULL) //WITHDRAW arg1= nó a retirar
             {
 
                 sscanf(buffer, "%s %s", command, arg1);
 
-                for (int i = 0; i < 100; i++)
+                for (i = 0; i < 100; i++)
                 {
-                    if(strcmp(nodo->table1[i], arg1) == 0)
+                    if(strcmp(nodo->table1[i], nodo->intr[fd]) == 0)
                     {
                         memset(nodo->table1[i],0,strlen(nodo->table1[i]));
                         memset(nodo->table2[i],0,strlen(nodo->table2[i]));
-                        break;
+                        strcpy(nodo->table1[i], "\0");
+                        strcpy(nodo->table2[i], "\0");
                     }
-                }
-                for (k = 0; k < 100; k++)
-                {
-                    if(strcmp(nodo->table2[k], arg1) == 0)
+                    if(strcmp(nodo->table2[i], nodo->intr[fd]) == 0)
                     {
-                        memset(nodo->table1[k],0,strlen(nodo->table1[k]));
-                        memset(nodo->table2[k],0,strlen(nodo->table2[k]));
-                        break;
+                        memset(nodo->table1[i],0,strlen(nodo->table1[i]));
+                        memset(nodo->table2[i],0,strlen(nodo->table2[i]));
+                        strcpy(nodo->table1[i], "\0");
+                        strcpy(nodo->table2[i], "\0");
                     }
                 }
-                if(strcmp(arg1, nodo->ext) == 0)
+                snprintf(message, sizeof(message), "%s %s%s", "WITHDRAW", arg1, "\n");
+                for(u = 0; u < 100; u++)
                 {
-                    send(selfClient_fd, buffer, strlen(buffer), 0);
+                    if(client_fds[u] != fd && client_fds[u] > 0) send(client_fds[u], message, strlen(message), 0);
                 }
-                else
-                {
-                    for(u = 0; u < 100; u++)
-                    {
-                        if(strcmp(arg1, nodo->intr[u]) == 0)
-                        {
-                            send(u, buffer, strlen(buffer), 0);
-                        }
-                    }
-
-                }
+                if(selfClient_fd > 0 && selfClient_fd != fd) send(selfClient_fd, message, strlen(message), 0);
 
             }
             else

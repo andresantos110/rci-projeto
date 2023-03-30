@@ -173,6 +173,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                         external_addr.sin_addr.s_addr = inet_addr(nodo->ipExt); //IP DO EXTERNO
                         external_addr.sin_port = htons(atoi(nodo->portExt)); //PORTA DO EXTERNO
                         if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
+                        nodo->fdExt = selfClient_fd;
                         memset(message, 0, sizeof(message));
                         snprintf(message, sizeof(message), "%s %s %s %s%s", "NEW", nodo->id, nodo->ip, nodo->port,"\n");
                         send(selfClient_fd, message , strlen(message) , 0 );
@@ -192,18 +193,12 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 errcode = commTCP(fds, nodo, regIP, regUDP, net, selfClient_fd, client_fds);
                 if(errcode == 0 || errcode == -1) // saida de interno ou mensagem nao segue protocolo
                 {
-                    strcpy(nodo->intr[fds], "\0");
-                    strcpy(nodo->ipIntr[fds], "\0");
-                    strcpy(nodo->portIntr[fds], "\0"); //limpar informacao do nó que saiu
                     close(fds);
                     num_clients--;
                     client_fds[i] = -1;
                 }
                 if(errcode == 1) //saida de outra ancora - promove interno a ancora
                 {
-                    strcpy(nodo->ext, nodo->bck);
-                    strcpy(nodo->ipExt, nodo->ipBck);
-                    strcpy(nodo->portExt, nodo->portBck);
                     close(fds);
                     num_clients--;
                     client_fds[i] = -1;
@@ -278,7 +273,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             {
                 memset(message,0,sizeof(message));
                 memset(buffer,0,sizeof(buffer));
-                snprintf(message, sizeof(message), "%s %s %s", "UNREG", net, nodo->id);
+                snprintf(message, sizeof(message), "%s %s %s%s", "UNREG", net, nodo->id, "\n");
                 if(strncmp(message, "UNREG", 5) != 0) printf("Erro");
                 //if(snprintf(message, sizeof(message), "%s %s %s", "UNREG", "105", nodo->id) !=0) exit(1); //erro neste snprintf
                 errcode = commUDP(message, buffer, regIP, regUDP);
@@ -385,12 +380,12 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             else if(strcmp(command, "sr") == 0)
             {
                 printf("Routing Table:\n");
-                printf("Destination     Neighbour");
+                printf("Destination  |  Neighbour\n");
                 for (int h = 0; h < 100; h++)
                 {
                     if(strcmp(nodo->table1[h] , "\0") != 0)
                     {
-                        printf(" %s %s  \n", nodo->table1[h], nodo->table2[h]);
+                        printf("     %s      |     %s     \n", nodo->table1[h], nodo->table2[h]);
                     }
                 }
             }
