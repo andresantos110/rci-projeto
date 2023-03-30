@@ -15,9 +15,6 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
     char command[16], arg1[32], arg2[32], arg3[32];
     int i = 0, k = 0, u = 0, l = 0, flg2 = 0;
 
-    //if(read(fd, buffer, 1024) == 0) return 0;
-    //else return 1;
-
     memset(buffer, 0, sizeof(buffer));
     memset(auxBuffer, 0, sizeof(auxBuffer));
     memset(message, 0, sizeof(message));
@@ -111,7 +108,6 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
     }
     else //caso exista comunicacao, return 2.
     {
-        //printf("RECEBIDO: %s\n", buffer);
         /*verificar o que recebeu
             new
             extern

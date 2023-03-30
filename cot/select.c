@@ -52,7 +52,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
         if(connect(selfClient_fd, (struct sockaddr *)&external_addr, sizeof(external_addr)) != 0) exit(1);
         snprintf(message, sizeof(message), "%s %s %s %s%s", "NEW", nodo->id, nodo->ip, nodo->port, "\n");
         nodo->fdExt = selfClient_fd;
-        send(selfClient_fd, message , strlen(message) , 0 );
+        send(selfClient_fd, message , strlen(message) , 0);
         fn = 0;
     }
     else fn = 1;
@@ -64,10 +64,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
     if(listen(server_fd, 100) == -1) exit(1);
 
     FD_ZERO(&read_fds);
-
-    //max_fd = server_fd > STDIN_FILENO ? server_fd : STDIN_FILENO;
-
-    //max_fd = max3(server_fd, STDIN_FILENO, selfClient_fd);
 
     max_fd = max(server_fd, STDIN_FILENO);
     if(selfClient_fd > max_fd) max_fd = selfClient_fd;
@@ -98,7 +94,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             printf("Select timeout.\n");
         }
 
-        if(FD_ISSET(server_fd, &read_fds)) //ligacao ao servidor
+        if(FD_ISSET(server_fd, &read_fds)) //Alguem se ligou ao servidor
         {
             FD_CLR(server_fd, &read_fds);
 
@@ -118,11 +114,11 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
         }
         if(fn == 0)
         {
-            if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo - nao esta a entrar?
+            if(FD_ISSET(selfClient_fd, &read_fds)) //atividade no externo (servidor ao qual nó se ligou)
             {
                 FD_CLR(selfClient_fd, &read_fds);
                 errcode = commTCP(selfClient_fd, nodo, regIP, regUDP, net, selfClient_fd, client_fds);
-                if(errcode == 1 || errcode == -1) //externo saiu, enviar a novo externo NEW OU mensagem nao segue protocolo
+                if(errcode == 1 || errcode == -1) //externo saiu
                 {
                     if(strcmp(nodo->bck, nodo->id) == 0)  //se for ancora e sair externo, tem de promover interno caso seja possivel
                     {//verificar se tem internos, promover se tiver, ext = id se nao
@@ -161,7 +157,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                     }
                     else
                     {
-
+                        //atualizar externo com backup e conectar
                         strcpy(nodo->ext, nodo->bck);
                         strcpy(nodo->ipExt, nodo->ipBck);
                         strcpy(nodo->portExt, nodo->portBck);
@@ -183,7 +179,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             }
         }
 
-        for (i = 0; i < 100; i++) //atividade num interno
+        for (i = 0; i < 100; i++) //atividade num nó que se ligou
         {
             fds = client_fds[i];
 
@@ -213,7 +209,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                     {
                         for(j=0;j<100;j++)
                         {
-                            if(strcmp(nodo->intr[j], "\0") != 0) //primeiro interno que encontra, cujo fd é i
+                            if(strcmp(nodo->intr[j], "\0") != 0) //primeiro interno que encontra, cujo fd é j
                             {
                                 strcpy(nodo->ext, nodo->intr[j]);
                                 strcpy(nodo->ipExt, nodo->ipIntr[j]);

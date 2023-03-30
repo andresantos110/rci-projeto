@@ -36,9 +36,9 @@ int main(int argc, char **argv)
         strcpy(nodo->table2[i], "\0");
     }
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(buffer, 0, sizeof(buffer)); //inicializar buffer
 
-    srand(time(0));
+    srand(time(0)); //inicializar variavel random para atribuir numero de nó caso seja repetido
 
     if(argc != 5 && argc != 3)
     {
@@ -61,32 +61,14 @@ int main(int argc, char **argv)
     strcpy(nodo->ip, argv[1]);
     strcpy(nodo->port, argv[2]);
 
-    /*if (word_count == 1){
-        command = word_array[0];
-    }
-
-    if (word_count == 3){
-        command = word_array[0];
-        arg1 = word_array[1];
-        arg2 = word_array[2];
-    }
-
-    if (word_count == 6){
-        command = word_array[0];
-        arg1 = word_array[1];
-        arg2 = word_array[2];
-        arg3 = word_array[3];
-        arg4 = word_array[4];
-        arg5 = word_array[5];
-    }*/
-
-
     printf("cot - Group 105\n");
     printf("Type help to show available commands.\n");
     printf("Enter a command:\n");
 
     while(1)
     {
+        //processamento de input
+
         fgets(input, sizeof(input), stdin);
 
         if(strcmp(input, "\n") == 0)
@@ -111,6 +93,7 @@ int main(int argc, char **argv)
 
             memset(input, 0, sizeof(input));
         }
+
 
         if(strcmp(command, "join") == 0) //arg1 = net; arg2 = id
         {
@@ -216,8 +199,6 @@ int main(int argc, char **argv)
             errcode = snprintf(message, sizeof(message), "%s %s %s %s %s", "REG", arg1, nodo->id, nodo->ip, nodo->port); //juntar strings para enviar
             if(errcode >= sizeof(message)) return -1;
 
-            //printf("Informação do nó:\nid: %s\next: %s\nbck: %s\n", nodo->id, nodo->ext, nodo->bck);
-
             memset(buffer,0,sizeof(buffer));
             errcode = commUDP(message, buffer, regIP, regUDP); //enviar REG
             if(errcode == 1)
@@ -300,7 +281,6 @@ int main(int argc, char **argv)
         {
             free(nodo);
             return 0;
-            //free memoria conteudos?
         }
         else if(strcmp(command, "create") == 0)
         {
