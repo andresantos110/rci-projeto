@@ -214,10 +214,18 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
 
                     for(u = 0; u < 100; u++)
                     {
-                        if(client_fds[u] != fd && client_fds[u] > 0) send(client_fds[u], message, strlen(message), 0);
+
+                        if(client_fds[u] != fd && client_fds[u] > 0)
+                        {
+                            send(client_fds[u], message, strlen(message), 0);
+                        }
                     }
 
-                    if(selfClient_fd > 0 && selfClient_fd != fd) send(selfClient_fd, message, strlen(message), 0);
+                    if(selfClient_fd > 0 && selfClient_fd != fd)
+                    {
+
+                        send(selfClient_fd, message, strlen(message), 0);
+                    }
                 }
 
                 memset(buffer,0,sizeof(buffer));
@@ -286,7 +294,6 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                     }
                     else
                     {
-
                         for (l = 0; l < 100; l++)
                         {
                             if(strcmp(nodo->table1[l], arg1) == 0)
@@ -318,7 +325,7 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
             }
             else if(strstr(buffer, "WITHDRAW") != NULL) //WITHDRAW arg1= nó a retirar
             {
-
+                printf("Received warning that node %s left the network. Updating routing...\n", arg1);
                 sscanf(buffer, "%s %s", command, arg1);
 
                 for (i = 0; i < 100; i++)
@@ -341,9 +348,15 @@ int commTCP(int fd, struct node *nodo, char *regIP, char *regUDP, char *net, int
                 snprintf(message, sizeof(message), "%s %s%s", "WITHDRAW", arg1, "\n");
                 for(u = 0; u < 100; u++)
                 {
-                    if(client_fds[u] != fd && client_fds[u] > 0) send(client_fds[u], message, strlen(message), 0);
+                    if(client_fds[u] != fd && client_fds[u] > 0)
+                    {
+                        send(client_fds[u], message, strlen(message), 0);
+                    } 
                 }
-                if(selfClient_fd > 0 && selfClient_fd != fd) send(selfClient_fd, message, strlen(message), 0);
+                if(selfClient_fd > 0 && selfClient_fd != fd)
+                {
+                    send(selfClient_fd, message, strlen(message), 0);
+                }
 
             }
             else
