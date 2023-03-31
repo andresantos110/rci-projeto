@@ -386,6 +386,19 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 }
             }
 
+            else if(strcmp(command, "cr") == 0)
+            {
+                for( i = 0; i < 100; i++)
+                {
+                    memset(nodo->table1[i], 0, sizeof(nodo->table1[i]));
+                    memset(nodo->table2[i], 0, sizeof(nodo->table2[i]));
+                    strcpy(nodo->table1[i], "\0");
+                    strcpy(nodo->table2[i], "\0");
+                    nodo->ntabela = 0;
+                }
+                printf("Cleared node routing.\n");
+            }
+
             else if(strcmp(command, "get") == 0)
             {
 
@@ -446,7 +459,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
             {
                 printf("Available commands:\n");
                 printf("create - Create a new content\ndelete - Delete existing content\nsn - Show contents\n");
-                printf("get - Search for content in other node\nst - Show node topology\nsr - Show node routing\n");
+                printf("get - Search for content in other node\nst - Show node topology\nsr - Show node routing\ncr - Clear node routing\n");
                 printf("leave - Leave the network and close application\nexit - Close application without leaving\n");
             }
 
