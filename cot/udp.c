@@ -35,7 +35,11 @@ int commUDP(char mensagem[], char buffer[], char regIP[], char regUDP[])
     if(error != 0) exit(1);
 
     n = sendto(fd, mensagem, strlen(mensagem), 0, res->ai_addr, res->ai_addrlen); //enviar mensagem
-    if(n == -1) exit (1);
+    if(n == -1)
+    {
+        printf("Error communicating with nodeserver. Are you connected to the internet?\nExiting...");
+        exit(1);
+    } 
 
     addrlen=sizeof(addr);
     if(recvfrom(fd, buffer, 1024, 0, &addr, &addrlen) < 0)//receber mensagem -- verificar timeout

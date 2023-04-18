@@ -271,7 +271,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                 memset(buffer,0,sizeof(buffer));
                 snprintf(message, sizeof(message), "%s %s %s%s", "UNREG", net, nodo->id, "\n");
                 if(strncmp(message, "UNREG", 5) != 0) printf("Erro");
-                //if(snprintf(message, sizeof(message), "%s %s %s", "UNREG", "105", nodo->id) !=0) exit(1); //erro neste snprintf
                 errcode = commUDP(message, buffer, regIP, regUDP);
                 if(errcode == 1)
                 {
@@ -285,6 +284,7 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                     exit(1);
                 }
                 if(strcmp(buffer, "OKUNREG") == 0) printf("Unreg successful - leaving network...\n");
+                else printf("Node not found on server, joined using djoin - leaving network...\n");
                 FD_ZERO(&read_fds);
                 close(server_fd);
                 close(selfClient_fd);

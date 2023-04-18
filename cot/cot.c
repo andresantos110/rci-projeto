@@ -270,6 +270,8 @@ int main(int argc, char **argv)
             strcpy(nodo->ipBck, nodo->ip);
             strcpy(nodo->portBck, nodo->port);
 
+            if(strcmp(nodo->ext, nodo->id) == 0) printf("First node to join.\n");
+            else printf("Connecting to node %s with IP %s and port %s\n", nodo->ext, nodo->ipExt, nodo->portExt);
             tcpSelect(nodo, regIP, regUDP, arg1);
         }
 
