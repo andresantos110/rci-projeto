@@ -283,7 +283,6 @@ void tcpSelect(struct node *nodo, char regIP[16], char regUDP[6], char *net)
                     printf("Could not communicate with node server.\n");
                     exit(1);
                 }
-                printf("Buffer: %s\n", buffer);
                 if(strcmp(buffer, "OKUNREG") == 0) printf("Leaving network...\n");
                 FD_ZERO(&read_fds);
                 close(server_fd);
