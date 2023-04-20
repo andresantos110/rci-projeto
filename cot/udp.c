@@ -37,7 +37,7 @@ int commUDP(char mensagem[], char buffer[], char regIP[], char regUDP[])
     n = sendto(fd, mensagem, strlen(mensagem), 0, res->ai_addr, res->ai_addrlen); //enviar mensagem
     if(n == -1)
     {
-        printf("Error communicating with nodeserver. Are you connected to the internet?\nExiting...");
+        printf("Error communicating with nodeserver. Are you connected to the internet?\nExiting...\n");
         exit(1);
     } 
 
